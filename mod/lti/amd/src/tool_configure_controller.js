@@ -46,7 +46,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method getToolCreateButton
      * @private
-     * @return {Object} jQuery object
+     * @return object jQuery object
      */
     var getToolCreateButton = function() {
         return $(SELECTORS.TOOL_CREATE_BUTTON);
@@ -57,7 +57,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method getToolListContainer
      * @private
-     * @return {Object} jQuery object
+     * @return object jQuery object
      */
     var getToolListContainer = function() {
         return $(SELECTORS.TOOL_LIST_CONTAINER);
@@ -68,7 +68,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method getExternalRegistrationContainer
      * @private
-     * @return {Object} jQuery object
+     * @return object jQuery object
      */
     var getExternalRegistrationContainer = function() {
         return $(SELECTORS.EXTERNAL_REGISTRATION_CONTAINER);
@@ -79,7 +79,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method getCartridgeRegistrationContainer
      * @private
-     * @return {Object} jQuery object
+     * @return object jQuery object
      */
     var getCartridgeRegistrationContainer = function() {
         return $(SELECTORS.CARTRIDGE_REGISTRATION_CONTAINER);
@@ -90,7 +90,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method getRegistrationChoiceContainer
      * @private
-     * @return {Object} jQuery object
+     * @return object jQuery object
      */
     var getRegistrationChoiceContainer = function() {
         return $(SELECTORS.REGISTRATION_CHOICE_CONTAINER);
@@ -101,7 +101,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method getToolURL
      * @private
-     * @return {String} the tool type url
+     * @return string
      */
     var getToolURL = function() {
         return $(SELECTORS.TOOL_URL).val();
@@ -156,7 +156,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      * panels.
      *
      * @method showCartridgeRegistration
-     * @param {String} url
      * @private
      */
     var showCartridgeRegistration = function(url) {
@@ -165,6 +164,20 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
         getCartridgeRegistrationContainer().removeClass('hidden');
         getCartridgeRegistrationContainer().find(SELECTORS.CARTRIDGE_REGISTRATION_FORM).attr('data-cartridge-url', url);
         screenReaderAnnounce(getCartridgeRegistrationContainer());
+    };
+
+    /**
+     * JAWS does not notice visibility changes with aria-live.
+     * Remove and add the content back to force it to read it out.
+     * This function can be removed once JAWS supports visibility.
+     *
+     * @method screenReaderAnnounce
+     * @private
+     */
+    var screenReaderAnnounce = function(element) {
+        var childClones = element.children().clone(true, true);
+        element.empty();
+        element.append(childClones);
     };
 
     /**
@@ -179,20 +192,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
         hideCartridgeRegistration();
         getRegistrationChoiceContainer().removeClass('hidden');
         screenReaderAnnounce(getRegistrationChoiceContainer());
-    };
-
-    /**
-     * JAWS does not notice visibility changes with aria-live.
-     * Remove and add the content back to force it to read it out.
-     * This function can be removed once JAWS supports visibility.
-     *
-     * @method screenReaderAnnounce
-     * @param {Object} element
-     * @private
-     */
-    var screenReaderAnnounce = function(element) {
-        var children = element.children().detach();
-        children.appendTo(element);
     };
 
     /**
@@ -219,7 +218,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      * Display the registration feedback alert and hide the other panels.
      *
      * @method showRegistrationFeedback
-     * @param {Object} data
      * @private
      */
     var showRegistrationFeedback = function(data) {
@@ -235,7 +233,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method startLoading
      * @private
-     * @param {Object} element jQuery object
+     * @param object jQuery object
      */
     var startLoading = function(element) {
         element.addClass("loading");
@@ -246,7 +244,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method stopLoading
      * @private
-     * @param {Object} element jQuery object
+     * @param object jQuery object
      */
     var stopLoading = function(element) {
         element.removeClass("loading");
@@ -279,7 +277,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
             .fail(promise.reject);
 
         promise.fail(notification.exception)
-            .always(function() {
+            .always(function () {
                     stopLoading(container);
                 });
     };
@@ -290,7 +288,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
      *
      * @method addTool
      * @private
-     * @return {Promise} jQuery Deferred object
+     * @return object jQuery deferred object
      */
     var addTool = function() {
         var url = $.trim(getToolURL());
@@ -304,9 +302,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
 
         var promise = toolType.isCartridge(url);
 
-        promise.always(function() {
-          stopLoading(toolButton);
-        });
+        promise.always(function() { stopLoading(toolButton); });
 
         promise.done(function(result) {
             if (result.iscartridge) {
@@ -317,9 +313,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/templates', 'mod_lti/e
             }
         });
 
-        promise.fail(function() {
+        promise.fail(function () {
             str.get_string('errorbadurl', 'mod_lti')
-                .done(function(s) {
+                .done(function (s) {
                         $(document).trigger(ltiEvents.REGISTRATION_FEEDBACK, {
                                 message: s,
                                 error: true

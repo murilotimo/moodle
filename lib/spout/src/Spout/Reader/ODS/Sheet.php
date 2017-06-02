@@ -27,13 +27,12 @@ class Sheet implements SheetInterface
 
     /**
      * @param XMLReader $xmlReader XML Reader, positioned on the "<table:table>" element
-     * @param bool $shouldFormatDates Whether date/time values should be returned as PHP objects or be formatted as strings
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
      * @param string $sheetName Name of the sheet
      */
-    public function __construct($xmlReader, $shouldFormatDates, $sheetIndex, $sheetName)
+    public function __construct($xmlReader, $sheetIndex, $sheetName)
     {
-        $this->rowIterator = new RowIterator($xmlReader, $shouldFormatDates);
+        $this->rowIterator = new RowIterator($xmlReader);
         $this->index = $sheetIndex;
         $this->name = $sheetName;
     }

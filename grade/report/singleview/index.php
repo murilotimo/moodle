@@ -184,7 +184,6 @@ if ($report->screen->display_group_selector()) {
 echo $report->output();
 
 if ($report->screen->supports_paging()) {
-    echo $report->screen->perpage_select();
     echo $report->screen->pager();
 }
 

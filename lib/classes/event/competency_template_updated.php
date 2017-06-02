@@ -52,12 +52,12 @@ class competency_template_updated extends base {
      * @return self
      */
     public static final function create_from_template(template $template) {
-        if (!$template->get('id')) {
+        if (!$template->get_id()) {
             throw new \coding_exception('The template ID must be set.');
         }
         $event = static::create(array(
-            'contextid'  => $template->get('contextid'),
-            'objectid' => $template->get('id')
+            'contextid'  => $template->get_contextid(),
+            'objectid' => $template->get_id()
         ));
         $event->add_record_snapshot(template::TABLE, $template->to_record());
         return $event;

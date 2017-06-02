@@ -120,9 +120,7 @@ class lesson_page_type_essay extends lesson_page {
         require_sesskey();
 
         if (!$data) {
-            $result->inmediatejump = true;
-            $result->newpageid = $this->properties->id;
-            return $result;
+            redirect(new moodle_url('/mod/lesson/view.php', array('id'=>$PAGE->cm->id, 'pageid'=>$this->properties->id)));
         }
 
         if (is_array($data->answer)) {

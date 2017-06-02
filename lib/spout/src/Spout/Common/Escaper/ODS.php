@@ -2,8 +2,6 @@
 
 namespace Box\Spout\Common\Escaper;
 
-use Box\Spout\Common\Singleton;
-
 /**
  * Class ODS
  * Provides functions to escape and unescape data for ODS files
@@ -12,8 +10,6 @@ use Box\Spout\Common\Singleton;
  */
 class ODS implements EscaperInterface
 {
-    use Singleton;
-
     /**
      * Escapes the given string to make it compatible with XLSX
      *

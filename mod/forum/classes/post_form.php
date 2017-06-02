@@ -50,7 +50,7 @@ class mod_forum_post_form extends moodleform {
             'maxbytes' => $maxbytes,
             'maxfiles' => $forum->maxattachments,
             'accepted_types' => '*',
-            'return_types' => FILE_INTERNAL | FILE_CONTROLLED_LINK
+            'return_types' => FILE_INTERNAL
         );
     }
 
@@ -133,7 +133,7 @@ class mod_forum_post_form extends moodleform {
             $mform->addHelpButton('discussionsubscribe', 'discussionsubscription', 'forum');
         }
 
-        if (forum_can_create_attachment($forum, $modcontext)) {
+        if (!empty($forum->maxattachments) && $forum->maxbytes != 1 && has_capability('mod/forum:createattachment', $modcontext))  {  //  1 = No attachments at all
             $mform->addElement('filemanager', 'attachments', get_string('attachment', 'forum'), null, self::attachment_options($forum));
             $mform->addHelpButton('attachments', 'attachment', 'forum');
         }
@@ -238,13 +238,6 @@ class mod_forum_post_form extends moodleform {
             $mform->setConstants(array('timestart' => 0, 'timeend' => 0));
         }
 
-        if (core_tag_tag::is_enabled('mod_forum', 'forum_posts')) {
-            $mform->addElement('header', 'tagshdr', get_string('tags', 'tag'));
-
-            $mform->addElement('tags', 'tags', get_string('tags'),
-                array('itemtype' => 'forum_posts', 'component' => 'mod_forum'));
-        }
-
         //-------------------------------------------------------------------------------
         // buttons
         if (isset($post->edit)) { // hack alert
@@ -266,6 +259,9 @@ class mod_forum_post_form extends moodleform {
 
         $mform->addElement('hidden', 'parent');
         $mform->setType('parent', PARAM_INT);
+
+        $mform->addElement('hidden', 'userid');
+        $mform->setType('userid', PARAM_INT);
 
         $mform->addElement('hidden', 'groupid');
         $mform->setType('groupid', PARAM_INT);

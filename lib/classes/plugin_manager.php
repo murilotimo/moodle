@@ -186,6 +186,19 @@ class core_plugin_manager {
 
         $this->installedplugins = array();
 
+        // TODO: Delete this block once Moodle 2.6 or later becomes minimum required version to upgrade.
+        if ($CFG->version < 2013092001.02) {
+            // We did not upgrade the database yet.
+            $modules = $DB->get_records('modules', array(), 'name ASC', 'id, name, version');
+            foreach ($modules as $module) {
+                $this->installedplugins['mod'][$module->name] = $module->version;
+            }
+            $blocks = $DB->get_records('block', array(), 'name ASC', 'id, name, version');
+            foreach ($blocks as $block) {
+                $this->installedplugins['block'][$block->name] = $block->version;
+            }
+        }
+
         $versions = $DB->get_records('config_plugins', array('name'=>'version'));
         foreach ($versions as $version) {
             $parts = explode('_', $version->plugin, 2);
@@ -1646,16 +1659,12 @@ class core_plugin_manager {
         // Moodle 2.3 supports upgrades from 2.2.x only.
         $plugins = array(
             'qformat' => array('blackboard', 'learnwise'),
-            'auth' => array('radius'),
-            'block' => array('course_overview'),
             'enrol' => array('authorize'),
-            'report' => array('search'),
-            'repository' => array('alfresco'),
             'tinymce' => array('dragmath'),
             'tool' => array('bloglevelupgrade', 'qeupgradehelper', 'timezoneimport'),
-            'theme' => array('afterburner', 'anomaly', 'arialist', 'base', 'binarius', 'boxxie', 'brick', 'canvas',
-                'formal_white', 'formfactor', 'fusion', 'leatherbound', 'magazine', 'mymobile', 'nimble', 'nonzero',
-                'overlay', 'serenity', 'sky_high', 'splash', 'standard', 'standardold'),
+            'theme' => array('mymobile', 'afterburner', 'anomaly', 'arialist', 'binarius', 'boxxie', 'brick', 'formal_white',
+                'formfactor', 'fusion', 'leatherbound', 'magazine', 'nimble', 'nonzero', 'overlay', 'serenity', 'sky_high',
+                'splash', 'standard', 'standardold'),
             'webservice' => array('amf'),
         );
 
@@ -1702,7 +1711,8 @@ class core_plugin_manager {
 
             'auth' => array(
                 'cas', 'db', 'email', 'fc', 'imap', 'ldap', 'lti', 'manual', 'mnet',
-                'nntp', 'nologin', 'none', 'oauth2', 'pam', 'pop3', 'shibboleth', 'webservice'
+                'nntp', 'nologin', 'none', 'pam', 'pop3', 'radius',
+                'shibboleth', 'webservice'
             ),
 
             'availability' => array(
@@ -1713,9 +1723,9 @@ class core_plugin_manager {
                 'activity_modules', 'activity_results', 'admin_bookmarks', 'badges',
                 'blog_menu', 'blog_recent', 'blog_tags', 'calendar_month',
                 'calendar_upcoming', 'comments', 'community',
-                'completionstatus', 'course_list', 'course_summary',
-                'feedback', 'globalsearch', 'glossary_random', 'html',
-                'login', 'lp', 'mentees', 'messages', 'mnet_hosts', 'myoverview', 'myprofile',
+                'completionstatus', 'course_list', 'course_overview',
+                'course_summary', 'feedback', 'globalsearch', 'glossary_random', 'html',
+                'login', 'lp', 'mentees', 'messages', 'mnet_hosts', 'myprofile',
                 'navigation', 'news_items', 'online_users', 'participants',
                 'private_files', 'quiz_results', 'recent_activity',
                 'rss_client', 'search_forums', 'section_links',
@@ -1732,7 +1742,7 @@ class core_plugin_manager {
             ),
 
             'cachestore' => array(
-                'file', 'memcache', 'memcached', 'mongodb', 'session', 'static', 'apcu', 'redis'
+                'file', 'memcache', 'memcached', 'mongodb', 'session', 'static'
             ),
 
             'calendartype' => array(
@@ -1754,10 +1764,6 @@ class core_plugin_manager {
 
             'datapreset' => array(
                 'imagegallery'
-            ),
-
-            'fileconverter' => array(
-                'unoconv', 'googledrive'
             ),
 
             'editor' => array(
@@ -1805,10 +1811,6 @@ class core_plugin_manager {
 
             'ltiservice' => array(
                 'memberships', 'profile', 'toolproxy', 'toolsettings'
-            ),
-
-            'media' => array(
-                'html5audio', 'html5video', 'swf', 'videojs', 'vimeo', 'youtube'
             ),
 
             'message' => array(
@@ -1862,20 +1864,20 @@ class core_plugin_manager {
             ),
 
             'quizaccess' => array(
-                'delaybetweenattempts', 'ipaddress', 'numattempts', 'offlineattempts', 'openclosedate',
+                'delaybetweenattempts', 'ipaddress', 'numattempts', 'openclosedate',
                 'password', 'safebrowser', 'securewindow', 'timelimit'
             ),
 
             'report' => array(
                 'backups', 'competency', 'completion', 'configlog', 'courseoverview', 'eventlist',
-                'log', 'loglive', 'outline', 'participation', 'progress', 'questioninstances',
+                'log', 'loglive', 'outline', 'participation', 'progress', 'questioninstances', 'search',
                 'security', 'stats', 'performance', 'usersessions'
             ),
 
             'repository' => array(
-                'areafiles', 'boxnet', 'coursefiles', 'dropbox', 'equella', 'filesystem',
+                'alfresco', 'areafiles', 'boxnet', 'coursefiles', 'dropbox', 'equella', 'filesystem',
                 'flickr', 'flickr_public', 'googledocs', 'local', 'merlot',
-                'onedrive', 'picasa', 'recent', 'skydrive', 's3', 'upload', 'url', 'user', 'webdav',
+                'picasa', 'recent', 'skydrive', 's3', 'upload', 'url', 'user', 'webdav',
                 'wikimedia', 'youtube'
             ),
 
@@ -1896,15 +1898,15 @@ class core_plugin_manager {
             ),
 
             'theme' => array(
-                'boost', 'bootstrapbase', 'clean', 'more'
+                'base', 'bootstrapbase', 'canvas', 'clean', 'more'
             ),
 
             'tool' => array(
                 'assignmentupgrade', 'availabilityconditions', 'behat', 'capability', 'cohortroles', 'customlang',
                 'dbtransfer', 'filetypes', 'generator', 'health', 'innodb', 'installaddon',
-                'langimport', 'log', 'lp', 'lpimportcsv', 'lpmigrate', 'messageinbound', 'mobile', 'multilangupgrade', 'monitor',
-                'oauth2', 'phpunit', 'profiling', 'recyclebin', 'replace', 'spamcleaner', 'task', 'templatelibrary',
-                'unittest', 'uploadcourse', 'uploaduser', 'unsuproles', 'usertours', 'xmldb'
+                'langimport', 'log', 'lp', 'lpmigrate', 'messageinbound', 'mobile', 'multilangupgrade', 'monitor',
+                'phpunit', 'profiling', 'recyclebin', 'replace', 'spamcleaner', 'task', 'templatelibrary',
+                'unittest', 'uploadcourse', 'uploaduser', 'unsuproles', 'xmldb'
             ),
 
             'webservice' => array(
@@ -1947,7 +1949,7 @@ class core_plugin_manager {
 
         if (!$this->is_plugin_folder_removable($plugin->component)) {
             throw new moodle_exception('err_removing_unremovable_folder', 'core_plugin', '',
-                array('plugin' => $plugin->component, 'rootdir' => $plugin->rootdir),
+                array('plugin' => $pluginfo->component, 'rootdir' => $pluginfo->rootdir),
                 'plugin root folder is not removable as expected');
         }
 

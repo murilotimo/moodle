@@ -16,7 +16,8 @@ Feature: Display extended course names
     And I should not see "C_shortname Course fullname"
 
   Scenario: Courses list with extended course names
-    Given I navigate to "Appearance > Courses" in site administration
+    Given I expand "Site administration" node
+    And I click on "Courses" "link" in the "//div[@id='settingsnav']/descendant::li[contains(concat(' ', normalize-space(@class), ' '), ' type_setting ')][contains(., 'Appearance')]" "xpath_element"
     And I set the field "Display extended course names" to "1"
     When I press "Save changes"
     And I am on site homepage

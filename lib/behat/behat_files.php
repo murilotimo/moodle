@@ -67,7 +67,7 @@ class behat_files extends behat_base {
         if (empty($filepickerelement)) {
             $filepickercontainer = $this->find(
                 'xpath',
-                "//*[@data-fieldtype=\"filemanager\"]",
+                "//*[@class=\"form-filemanager\"]",
                 $exception
             );
         } else {
@@ -76,7 +76,8 @@ class behat_files extends behat_base {
             $filepickercontainer = $this->find(
                 'xpath',
                 "//input[./@id = //label[normalize-space(.)=$filepickerelement]/@for]" .
-                    '//ancestor::div[@data-fieldtype="filemanager" or @data-fieldtype="filepicker"]',
+                    "//ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' ffilemanager ') or " .
+                    "contains(concat(' ', normalize-space(@class), ' '), ' ffilepicker ')]",
                 $exception
             );
         }
@@ -124,10 +125,9 @@ class behat_files extends behat_base {
         if ($filemanagerelement) {
             $containernode = $this->get_filepicker_node($filemanagerelement);
             $exceptionmsg = 'The "'.$filemanagerelement.'" filemanager ' . $exceptionmsg;
-            $locatorprefix = "//div[contains(concat(' ', normalize-space(@class), ' '), ' fp-content ')]";
+            $locatorprefix = "//div[@class='fp-content']";
         } else {
-            $locatorprefix = "//div[contains(concat(' ', normalize-space(@class), ' '), ' fp-repo-items ')]" .
-                             "//descendant::div[contains(concat(' ', normalize-space(@class), ' '), ' fp-content ')]";
+            $locatorprefix = "//div[contains(concat(' ', normalize-space(@class), ' '), ' fp-repo-items ')]//descendant::div[@class='fp-content']";
         }
 
         $exception = new ExpectationException($exceptionmsg, $this->getSession());

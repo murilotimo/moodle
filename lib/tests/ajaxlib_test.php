@@ -70,7 +70,7 @@ class core_ajaxlib_testcase extends advanced_testcase {
         echo $content;
 
         if ($expectexception) {
-            $this->expectException('coding_exception');
+            $this->setExpectedException('coding_exception');
             ajax_check_captured_output();
         } else {
             $result = ajax_check_captured_output();

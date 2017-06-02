@@ -49,13 +49,13 @@ class competency_user_evidence_updated extends base {
      * @return self
      */
     public static final function create_from_user_evidence(user_evidence $userevidence) {
-        if (!$userevidence->get('id')) {
+        if (!$userevidence->get_id()) {
             throw new \coding_exception('The evidence of prior learning ID must be set.');
         }
         $event = static::create(array(
             'contextid'  => $userevidence->get_context()->id,
-            'objectid' => $userevidence->get('id'),
-            'relateduserid' => $userevidence->get('userid')
+            'objectid' => $userevidence->get_id(),
+            'relateduserid' => $userevidence->get_userid()
         ));
         $event->add_record_snapshot(user_evidence::TABLE, $userevidence->to_record());
         return $event;

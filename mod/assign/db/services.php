@@ -207,8 +207,7 @@ $functions = array(
                 'description'   => 'List the participants for a single assignment, with some summary info about their submissions.',
                 'type'          => 'read',
                 'ajax'          => true,
-                'capabilities'  => 'mod/assign:view, mod/assign:viewgrades',
-                'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+                'capabilities'  => 'mod/assign:view, mod/assign:viewgrades'
         ),
 
         'mod_assign_submit_grading_form' => array(
@@ -218,8 +217,7 @@ $functions = array(
                 'description'   => 'Submit the grading form data via ajax',
                 'type'          => 'write',
                 'ajax'          => true,
-                'capabilities'  => 'mod/assign:grade',
-                'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+                'capabilities'  => 'mod/assign:grade'
         ),
         'mod_assign_get_participant' => array(
                 'classname'     => 'mod_assign_external',
@@ -228,17 +226,6 @@ $functions = array(
                 'description'   => 'Get a participant for an assignment, with some summary info about their submissions.',
                 'type'          => 'read',
                 'ajax'          => true,
-                'capabilities'  => 'mod/assign:view, mod/assign:viewgrades',
-                'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+                'capabilities'  => 'mod/assign:view, mod/assign:viewgrades'
         ),
-        'mod_assign_view_assign' => array(
-            'classname'     => 'mod_assign_external',
-            'methodname'    => 'view_assign',
-            'classpath'     => 'mod/assign/externallib.php',
-            'description'   => 'Update the module completion status.',
-            'type'          => 'write',
-            'capabilities'  => 'mod/assign:view',
-            'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
-        ),
-
 );

@@ -57,7 +57,7 @@ class info_section extends info {
     }
 
     protected function get_view_hidden_capability() {
-        return 'moodle/course:ignoreavailabilityrestrictions';
+        return 'moodle/course:viewhiddensections';
     }
 
     protected function set_in_database($availability) {

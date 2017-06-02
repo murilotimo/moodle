@@ -26,7 +26,6 @@ namespace tool_lp\form;
 defined('MOODLE_INTERNAL') || die();
 
 use moodleform;
-use core\form\persistent;
 
 require_once($CFG->libdir . '/formslib.php');
 

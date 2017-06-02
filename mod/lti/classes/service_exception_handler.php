@@ -94,9 +94,9 @@ class service_exception_handler {
     /**
      * Echo an exception message encapsulated in XML.
      *
-     * @param \Exception|\Throwable $exception The exception that was thrown
+     * @param \Exception $exception The exception that was thrown
      */
-    public function handle($exception) {
+    public function handle(\Exception $exception) {
         $message = $exception->getMessage();
 
         // Add the exception backtrace for developers.

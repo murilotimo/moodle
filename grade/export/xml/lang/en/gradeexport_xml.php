@@ -23,7 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['eventgradeexported'] = 'XML grade exported';
 $string['pluginname'] = 'XML file';
 $string['xml:publish'] = 'Publish XML grade export';
 $string['xml:view'] = 'Use XML grade export';

@@ -76,8 +76,7 @@ if (!$file or is_dir($file)) {
 }
 
 $etag = sha1("$component/$path");
-// 90 days only - based on Moodle point release cadence being every 3 months.
-$lifetime = 60 * 60 * 24 * 90;
+$lifetime = 60*60*24*120; // 120 days should be enough.
 $pathinfo = pathinfo($path);
 
 if (empty($pathinfo['extension'])) {
@@ -126,7 +125,7 @@ header('Content-Disposition: inline; filename="'.$filename.'"');
 header('Last-Modified: '. gmdate('D, d M Y H:i:s', filemtime($file)) .' GMT');
 header('Expires: '. gmdate('D, d M Y H:i:s', time() + $lifetime) .' GMT');
 header('Pragma: ');
-header('Cache-Control: public, max-age='.$lifetime.', immutable');
+header('Cache-Control: public, max-age='.$lifetime);
 header('Accept-Ranges: none');
 header('Content-Type: '.$mimetype);
 

@@ -188,9 +188,7 @@ class core_cache_testcase extends advanced_testcase {
     }
 
     /**
-     * Tests set_identifiers fails post cache creation.
-     *
-     * set_identifiers cannot be called after initial cache instantiation, as you need to create a difference cache.
+     * Tests set_identifiers resets identifiers and static cache
      */
     public function test_set_identifiers() {
         $instance = cache_config_testing::instance();
@@ -206,8 +204,16 @@ class core_cache_testcase extends advanced_testcase {
         $this->assertTrue($cache->set('contest', 'test data 1'));
         $this->assertEquals('test data 1', $cache->get('contest'));
 
-        $this->expectException('coding_exception');
         $cache->set_identifiers(array());
+        $this->assertFalse($cache->get('contest'));
+        $this->assertTrue($cache->set('contest', 'empty ident'));
+        $this->assertEquals('empty ident', $cache->get('contest'));
+
+        $cache->set_identifiers(array('area'));
+        $this->assertEquals('test data 1', $cache->get('contest'));
+
+        $cache->set_identifiers(array());
+        $this->assertEquals('empty ident', $cache->get('contest'));
     }
 
     /**
@@ -1309,10 +1315,8 @@ class core_cache_testcase extends advanced_testcase {
 
         $configfile = $CFG->dataroot.'/muc/config.php';
 
-        // The config file will not exist yet as we've not done anything with the cache.
-        // reset_all_data removes the file and without a call to create a configuration it doesn't exist
-        // as yet.
-        $this->assertFileNotExists($configfile);
+        // That's right, we're deleting the config file.
+        $this->assertTrue(@unlink($configfile));
 
         // Disable the cache
         cache_phpunit_factory::phpunit_disable();
@@ -2016,16 +2020,6 @@ class core_cache_testcase extends advanced_testcase {
         $this->assertEquals('b', $returnedinstance2->name);
     }
 
-    public function test_identifiers_have_separate_caches() {
-        $cachepg = cache::make('core', 'databasemeta', array('dbfamily' => 'pgsql'));
-        $cachepg->set(1, 'here');
-        $cachemy = cache::make('core', 'databasemeta', array('dbfamily' => 'mysql'));
-        $cachemy->set(2, 'there');
-        $this->assertEquals('here', $cachepg->get(1));
-        $this->assertEquals('there', $cachemy->get(2));
-        $this->assertFalse($cachemy->get(1));
-    }
-
     public function test_performance_debug() {
         global $CFG;
         $this->resetAfterTest(true);
@@ -2175,58 +2169,5 @@ class core_cache_testcase extends advanced_testcase {
             $startstats[$requestid]['stores']['cachestore_static']['hits']);
         $this->assertEquals(0, $endstats[$requestid]['stores']['cachestore_static']['sets'] -
             $startstats[$requestid]['stores']['cachestore_static']['sets']);
-    }
-
-    public function test_performance_debug_off() {
-        global $CFG;
-        $this->resetAfterTest(true);
-        $CFG->perfdebug = 7;
-
-        $instance = cache_config_testing::instance();
-        $applicationid = 'phpunit/applicationperfoff';
-        $instance->phpunit_add_definition($applicationid, array(
-            'mode' => cache_store::MODE_APPLICATION,
-            'component' => 'phpunit',
-            'area' => 'applicationperfoff'
-        ));
-        $sessionid = 'phpunit/sessionperfoff';
-        $instance->phpunit_add_definition($sessionid, array(
-            'mode' => cache_store::MODE_SESSION,
-            'component' => 'phpunit',
-            'area' => 'sessionperfoff'
-        ));
-        $requestid = 'phpunit/requestperfoff';
-        $instance->phpunit_add_definition($requestid, array(
-            'mode' => cache_store::MODE_REQUEST,
-            'component' => 'phpunit',
-            'area' => 'requestperfoff'
-        ));
-
-        $application = cache::make('phpunit', 'applicationperfoff');
-        $session = cache::make('phpunit', 'sessionperfoff');
-        $request = cache::make('phpunit', 'requestperfoff');
-
-        // Check that no stats are recorded for these definitions yet.
-        $stats = cache_helper::get_stats();
-        $this->assertArrayNotHasKey($applicationid, $stats);
-        $this->assertArrayNotHasKey($sessionid, $stats);
-        $this->assertArrayNotHasKey($requestid, $stats);
-
-        // Trigger cache misses, cache sets and cache hits.
-        $this->assertFalse($application->get('missMe'));
-        $this->assertTrue($application->set('setMe', 1));
-        $this->assertEquals(1, $application->get('setMe'));
-        $this->assertFalse($session->get('missMe'));
-        $this->assertTrue($session->set('setMe', 3));
-        $this->assertEquals(3, $session->get('setMe'));
-        $this->assertFalse($request->get('missMe'));
-        $this->assertTrue($request->set('setMe', 4));
-        $this->assertEquals(4, $request->get('setMe'));
-
-        // Check that no stats are being recorded for these definitions.
-        $endstats = cache_helper::get_stats();
-        $this->assertArrayNotHasKey($applicationid, $endstats);
-        $this->assertArrayNotHasKey($sessionid, $endstats);
-        $this->assertArrayNotHasKey($requestid, $endstats);
     }
 }

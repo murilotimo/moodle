@@ -44,22 +44,6 @@ class behat_command {
 
     /**
      * Ensures the behat dir exists in moodledata
-     *
-     * @return string Full path
-     */
-    public static function get_parent_behat_dir() {
-        global $CFG;
-
-        // If not set then return empty string.
-        if (!isset($CFG->behat_dataroot_parent)) {
-            return "";
-        }
-
-        return $CFG->behat_dataroot_parent;
-    }
-
-    /**
-     * Ensures the behat dir exists in moodledata
      * @param int $runprocess run process for which behat dir is returned.
      * @return string Full path
      */
@@ -71,11 +55,12 @@ class behat_command {
             return "";
         }
 
-        // If $CFG->behat_parallel_run starts with index 0 and $runprocess for parallel run starts with 1.
-        if (!empty($runprocess) && isset($CFG->behat_parallel_run[$runprocess - 1]['behat_dataroot'])) {
+        if (empty($runprocess)) {
+            $behatdir = $CFG->behat_dataroot . '/behat';
+        } else if (isset($CFG->behat_parallel_run[$runprocess - 1]['behat_dataroot'])) {
             $behatdir = $CFG->behat_parallel_run[$runprocess - 1]['behat_dataroot'] . '/behat';;
         } else {
-            $behatdir = $CFG->behat_dataroot . '/behat';
+            $behatdir = $CFG->behat_dataroot . $runprocess . '/behat';
         }
 
         if (!is_dir($behatdir)) {
@@ -121,10 +106,7 @@ class behat_command {
 
         // If relative path then prefix relative path.
         if ($absolutepath) {
-            $pathprefix = testing_cli_argument_path('/');
-            if (!empty($pathprefix)) {
-                $pathprefix .= $separator;
-            }
+            $pathprefix = testing_cli_argument_path('/') . $separator;
         } else {
             $pathprefix = '';
         }

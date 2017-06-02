@@ -31,7 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(__DIR__ . '/../../config.php');
+require_once(dirname(__FILE__) . '/../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot . '/' . $CFG->admin . '/roles/lib.php');
 
@@ -216,9 +216,9 @@ die;
 function get_action_icon($url, $icon, $alt, $tooltip) {
     global $OUTPUT;
     return '<a title="' . $tooltip . '" href="'. $url . '">' .
-            $OUTPUT->pix_icon('t/' . $icon, $alt) . '</a> ';
+            '<img src="' . $OUTPUT->pix_url('t/' . $icon) . '" class="iconsmall" alt="' . $alt . '" /></a> ';
 }
 function get_spacer() {
     global $OUTPUT;
-    return $OUTPUT->spacer();
+    return '<img src="' . $OUTPUT->pix_url('spacer') . '" class="iconsmall" alt="" /> ';
 }

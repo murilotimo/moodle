@@ -119,8 +119,9 @@ class format_topics_renderer extends format_section_renderer_base {
         }
         $url->param('sesskey', sesskey());
 
+        $isstealth = $section->section > $course->numsections;
         $controls = array();
-        if ($section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
+        if (!$isstealth && $section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
             if ($course->marker == $section->section) {  // Show the "light globe" on/off.
                 $url->param('marker', 0);
                 $markedthistopic = get_string('markedthistopic');
@@ -128,8 +129,7 @@ class format_topics_renderer extends format_section_renderer_base {
                 $controls['highlight'] = array('url' => $url, "icon" => 'i/marked',
                                                'name' => $highlightoff,
                                                'pixattr' => array('class' => '', 'alt' => $markedthistopic),
-                                               'attr' => array('class' => 'editing_highlight', 'title' => $markedthistopic,
-                                                   'data-action' => 'removemarker'));
+                                               'attr' => array('class' => 'editing_highlight', 'title' => $markedthistopic));
             } else {
                 $url->param('marker', $section->section);
                 $markthistopic = get_string('markthistopic');
@@ -137,8 +137,7 @@ class format_topics_renderer extends format_section_renderer_base {
                 $controls['highlight'] = array('url' => $url, "icon" => 'i/marker',
                                                'name' => $highlight,
                                                'pixattr' => array('class' => '', 'alt' => $markthistopic),
-                                               'attr' => array('class' => 'editing_highlight', 'title' => $markthistopic,
-                                                   'data-action' => 'setmarker'));
+                                               'attr' => array('class' => 'editing_highlight', 'title' => $markthistopic));
             }
         }
 

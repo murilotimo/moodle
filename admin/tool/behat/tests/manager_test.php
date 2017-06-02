@@ -70,7 +70,6 @@ class tool_behat_manager_testcase extends advanced_testcase {
         );
 
         $array = testable_behat_config_manager::merge_config($array1, $array2);
-        $this->assertDebuggingCalled("Use of merge_config is deprecated, please see behat_config_util");
 
         // Overrides are applied.
         $this->assertEquals('OVERRIDDEN1', $array['simple']);
@@ -96,7 +95,6 @@ class tool_behat_manager_testcase extends advanced_testcase {
         );
 
         $array = testable_behat_config_manager::merge_config($array1, $array2);
-        $this->assertDebuggingCalled("Use of merge_config is deprecated, please see behat_config_util");
 
         // Overrides applied.
         $this->assertNotEmpty($array['simple']);
@@ -113,8 +111,6 @@ class tool_behat_manager_testcase extends advanced_testcase {
      */
     public function test_config_file_contents() {
         global $CFG;
-
-        $this->resetAfterTest(true);
 
         // Skip tests if behat is not installed.
         $vendorpath = $CFG->dirroot . '/vendor';
@@ -142,24 +138,21 @@ class tool_behat_manager_testcase extends advanced_testcase {
         );
 
         $contents = testable_behat_config_manager::get_config_file_contents($features, $stepsdefinitions);
-        $this->assertDebuggingCalled("Use of get_config_file_contents is deprecated, please see behat_config_util");
 
         // YAML decides when is is necessary to wrap strings between single quotes, so not controlled
         // values like paths should not be asserted including the key name as they would depend on the
         // directories values.
-        $this->assertContains($CFG->dirroot,
-            $contents['default']['extensions']['Moodle\BehatExtension']['moodledirroot']);
+        $this->assertContains($CFG->dirroot, $contents);
 
         // Not quoted strings.
-        $this->assertEquals('/me/lo/robaron',
-            $contents['default']['extensions']['Moodle\BehatExtension']['steps_definitions']['micarro']);
+        $this->assertContains('micarro: /me/lo/robaron', $contents);
 
         // YAML uses single quotes to wrap URL strings.
-        $this->assertEquals($CFG->behat_wwwroot, $contents['default']['extensions']['Behat\MinkExtension']['base_url']);
+        $this->assertContains("base_url: '" . $CFG->behat_wwwroot . "'", $contents);
 
         // Lists.
-        $this->assertEquals('feature1', $contents['default']['suites']['default']['paths'][0]);
-        $this->assertEquals('feature3', $contents['default']['suites']['default']['paths'][2]);
+        $this->assertContains('- feature1', $contents);
+        $this->assertContains('- feature3', $contents);
 
         unset($CFG->behat_wwwroot);
     }

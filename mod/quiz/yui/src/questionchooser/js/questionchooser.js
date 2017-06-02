@@ -1,7 +1,7 @@
 var CSS = {
-    ADDNEWQUESTIONBUTTONS: '.menu [data-action="addquestion"]',
+    ADDNEWQUESTIONBUTTONS: 'ul.menu a.addquestion',
     CREATENEWQUESTION: 'div.createnewquestion',
-    CHOOSERDIALOGUE: 'div.chooserdialoguebody',
+    CHOOSERDIALOGUE: 'div.chooserdialogue',
     CHOOSERHEADER: 'div.choosertitle'
 };
 

@@ -230,12 +230,10 @@ abstract class tablelike extends screen {
      * @return array
      */
     public function buttons() {
-        global $OUTPUT;
-
-        $save = $OUTPUT->render_from_template('gradereport_singleview/button', [
+        $save = html_writer::empty_tag('input', array(
             'type' => 'submit',
             'value' => get_string('save', 'gradereport_singleview'),
-        ]);
+        ));
 
         return array($save);
     }

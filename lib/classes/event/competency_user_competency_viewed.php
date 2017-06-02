@@ -52,15 +52,15 @@ class competency_user_competency_viewed extends base {
      * @return self
      */
     public static function create_from_user_competency_viewed(user_competency $usercompetency) {
-        if (!$usercompetency->get('id')) {
+        if (!$usercompetency->get_id()) {
             throw new \coding_exception('The user competency ID must be set.');
         }
         $params = array(
             'contextid' => $usercompetency->get_context()->id,
-            'objectid' => $usercompetency->get('id'),
-            'relateduserid' => $usercompetency->get('userid'),
+            'objectid' => $usercompetency->get_id(),
+            'relateduserid' => $usercompetency->get_userid(),
             'other' => array(
-                'competencyid' => $usercompetency->get('competencyid')
+                'competencyid' => $usercompetency->get_competencyid()
             )
         );
 

@@ -25,4 +25,3 @@
  */
 
 $string['pluginname'] = 'Latlong';
-$string['fieldtypelabel'] = 'Latitude/longitude field';

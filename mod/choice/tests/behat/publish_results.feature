@@ -17,7 +17,8 @@ Feature: A teacher can choose one of 4 options for publishing choice results
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
 
   Scenario: Do not publish results to students
     Given I add a "Choice" to section "1" and I fill the form with:
@@ -28,7 +29,7 @@ Feature: A teacher can choose one of 4 options for publishing choice results
       | option[1] | Option 2 |
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     When I choose "Option 1" from "Choice 1" choice activity
     Then I should see "Your selection: Option 1"
     And I should not see "Responses"
@@ -43,13 +44,15 @@ Feature: A teacher can choose one of 4 options for publishing choice results
       | Publish results | Show results to students after they answer |
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     When I follow "Choice 1"
     Then I should not see "Responses"
-    And I am on "Course 1" course homepage
+    And I should not see "Graph display"
+    And I follow "Course 1"
     And I choose "Option 1" from "Choice 1" choice activity
     And I should see "Your selection: Option 1"
     And I should see "Responses"
+    And I should see "Graph display"
 
   Scenario: Show results to students only after the choice is closed
     Given I add a "Choice" to section "1" and I fill the form with:
@@ -60,31 +63,32 @@ Feature: A teacher can choose one of 4 options for publishing choice results
       | option[1] | Option 2 |
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     When I follow "Choice 1"
     Then I should not see "Responses"
+    And I should not see "Graph display"
     And I choose "Option 1" from "Choice 1" choice activity
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I follow "Choice 1"
     And I follow "Edit settings"
     And I expand all fieldsets
     And I set the following fields to these values:
-      | timeopen[enabled] | 1 |
+      | Restrict answering to this time period | 1 |
       | timeopen[day] | 1 |
       | timeopen[month] | January |
       | timeopen[year] | 2010 |
-      | timeclose[enabled] | 1 |
       | timeclose[day] | 2 |
       | timeclose[month] | January |
       | timeclose[year] | 2010 |
     And I press "Save and return to course"
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I follow "Choice 1"
     And I should see "Responses"
+    And I should see "Graph display"
 
   Scenario: Always show results to students
     Given I add a "Choice" to section "1" and I fill the form with:
@@ -95,6 +99,7 @@ Feature: A teacher can choose one of 4 options for publishing choice results
       | Publish results | Always show results to students |
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     When I follow "Choice 1"
     And I should see "Responses"
+    And I should see "Graph display"

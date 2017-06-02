@@ -15,7 +15,7 @@ Feature: Test importing questions from WebCT format.
       | user    | course | role           |
       | teacher | C1     | editingteacher |
     And I log in as "teacher"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
 
   @javascript @_file_upload
   Scenario: import some WebCT questions

@@ -53,16 +53,16 @@ class competency_user_competency_plan_viewed extends base {
      * @return self
      */
     public static function create_from_user_competency_plan(user_competency_plan $usercompetencyplan) {
-        if (!$usercompetencyplan->get('id')) {
+        if (!$usercompetencyplan->get_id()) {
             throw new \coding_exception('The user competency plan ID must be set.');
         }
         $event = static::create(array(
             'contextid' => $usercompetencyplan->get_context()->id,
-            'objectid' => $usercompetencyplan->get('id'),
-            'relateduserid' => $usercompetencyplan->get('userid'),
+            'objectid' => $usercompetencyplan->get_id(),
+            'relateduserid' => $usercompetencyplan->get_userid(),
             'other' => array(
-                'planid' => $usercompetencyplan->get('planid'),
-                'competencyid' => $usercompetencyplan->get('competencyid')
+                'planid' => $usercompetencyplan->get_planid(),
+                'competencyid' => $usercompetencyplan->get_competencyid()
             )
         ));
         $event->add_record_snapshot(user_competency_plan::TABLE, $usercompetencyplan->to_record());

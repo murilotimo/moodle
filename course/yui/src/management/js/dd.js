@@ -20,8 +20,8 @@ DragDrop.ATTRS = {
      * @type Console
      * @writeOnce
      */
-    console: {
-        writeOnce: 'initOnly'
+    console : {
+        writeOnce : 'initOnly'
     }
 };
 DragDrop.prototype = {
@@ -31,7 +31,7 @@ DragDrop.prototype = {
      * @protected
      * @default false
      */
-    goingup: false,
+    goingup : false,
 
     /**
      * The last Y position of the course being dragged
@@ -39,7 +39,7 @@ DragDrop.prototype = {
      * @protected
      * @default null
      */
-    lasty: null,
+    lasty : null,
 
     /**
      * The sibling above the course being dragged currently (tracking its original position).
@@ -48,13 +48,13 @@ DragDrop.prototype = {
      * @protected
      * @default false
      */
-    previoussibling: null,
+    previoussibling : null,
 
     /**
      * Initialises the DragDrop instance.
      * @method initializer
      */
-    initializer: function() {
+    initializer : function() {
         var managementconsole = this.get('console'),
             container = managementconsole.get('element'),
             categorylisting = container.one('#category-listing'),
@@ -69,11 +69,7 @@ DragDrop.prototype = {
             return false;
         }
 
-        while (contstraint.get('scrollHeight') === 0 && !contstraint.compareTo(window.document.body)) {
-            contstraint = contstraint.get('parentNode');
-        }
-
-        courseul.all('> li').each(function(li) {
+        courseul.all('> li').each(function(li){
             this.initCourseListing(li, contstraint);
         }, this);
         courseul.setData('dd', new Y.DD.Drop({
@@ -81,7 +77,7 @@ DragDrop.prototype = {
         }));
         if (canmoveoutof && categoryul) {
             // Category UL may not be there if viewmode is just courses.
-            categoryul.all('li > div').each(function(div) {
+            categoryul.all('li > div').each(function(div){
                 this.initCategoryListitem(div);
             }, this);
         }
@@ -100,10 +96,10 @@ DragDrop.prototype = {
      * @method initCourseListing
      * @param Node
      */
-    initCourseListing: function(node, contstraint) {
+    initCourseListing : function(node, contstraint) {
         node.setData('dd', new Y.DD.Drag({
-            node: node,
-            target: {
+            node : node,
+            target : {
                 padding: '0 0 0 20'
             }
         }).addHandle(
@@ -121,7 +117,7 @@ DragDrop.prototype = {
      * @method initCategoryListitem
      * @param Node
      */
-    initCategoryListitem: function(node) {
+    initCategoryListitem : function(node) {
         node.setData('dd', new Y.DD.Drop({
             node: node
         }));
@@ -133,7 +129,7 @@ DragDrop.prototype = {
      * @private
      * @param {EventFacade} e
      */
-    dragStart: function(e) {
+    dragStart : function(e) {
         var drag = e.target,
             node = drag.get('node'),
             dragnode = drag.get('dragNode');
@@ -148,7 +144,7 @@ DragDrop.prototype = {
      * @private
      * @param {EventFacade} e
      */
-    dragEnd: function(e) {
+    dragEnd : function(e) {
         var drag = e.target,
             node = drag.get('node');
         node.removeClass('course-being-dragged');
@@ -161,7 +157,7 @@ DragDrop.prototype = {
      * @private
      * @param {EventFacade} e
      */
-    dragDrag: function(e) {
+    dragDrag : function(e) {
         var y = e.target.lastXY[1];
         if (y < this.lasty) {
             this.goingup = true;
@@ -177,8 +173,8 @@ DragDrop.prototype = {
      * @private
      * @param {EventFacade} e
      */
-    dropOver: function(e) {
-        // Get a reference to our drag and drop nodes
+    dropOver : function(e) {
+        //Get a reference to our drag and drop nodes
         var drag = e.drag.get('node'),
             drop = e.drop.get('node'),
             tag = drop.get('tagName').toLowerCase();
@@ -202,7 +198,7 @@ DragDrop.prototype = {
      * @private
      * @param {EventFacade} e
      */
-    dropEnter: function(e) {
+    dropEnter : function(e) {
         var drop = e.drop.get('node'),
             tag = drop.get('tagName').toLowerCase();
         if (tag === 'div') {
@@ -216,7 +212,7 @@ DragDrop.prototype = {
      * @private
      * @param {EventFacade} e
      */
-    dropExit: function(e) {
+    dropExit : function(e) {
         var drop = e.drop.get('node'),
             tag = drop.get('tagName').toLowerCase();
         if (tag === 'div') {
@@ -230,7 +226,7 @@ DragDrop.prototype = {
      * @private
      * @param {EventFacade} e
      */
-    dropHit: function(e) {
+    dropHit : function(e) {
         var drag = e.drag.get('node'),
             drop = e.drop.get('node'),
             iscategory = (drop.ancestor('.listitem-category') !== null),
@@ -263,7 +259,7 @@ DragDrop.prototype = {
             course = managementconsole.getCourseById(courseid);
             previoussibling = drag.get('previousSibling');
             aftercourseid = (previoussibling) ? previoussibling.getData('id') || 0 : 0;
-            previousid = (this.previoussibling) ? this.previoussibling.getData('id') : 0;
+            previousid = (this.previoussibling) ?  this.previoussibling.getData('id') : 0;
             if (aftercourseid !== previousid) {
                 course.moveAfter(aftercourseid, previousid);
             }

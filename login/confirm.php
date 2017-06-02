@@ -25,19 +25,22 @@
  */
 
 require('../config.php');
-require_once($CFG->libdir . '/authlib.php');
 
 $data = optional_param('data', '', PARAM_RAW);  // Formatted as:  secret/username
 
 $p = optional_param('p', '', PARAM_ALPHANUM);   // Old parameter:  secret
 $s = optional_param('s', '', PARAM_RAW);        // Old parameter:  username
-$redirect = optional_param('redirect', '', PARAM_LOCALURL);    // Where to redirect the browser once the user has been confirmed.
 
 $PAGE->set_url('/login/confirm.php');
 $PAGE->set_context(context_system::instance());
 
-if (!$authplugin = signup_get_user_confirmation_authplugin()) {
-    throw new moodle_exception('confirmationnotenabled');
+if (empty($CFG->registerauth)) {
+    print_error('cannotusepage2');
+}
+$authplugin = get_auth_plugin($CFG->registerauth);
+
+if (!$authplugin->can_confirm()) {
+    print_error('cannotusepage2');
 }
 
 if (!empty($data) || (!empty($p) && !empty($s))) {
@@ -79,14 +82,10 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
 
             \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
 
-            // Check where to go, $redirect has a higher preference.
-            if (empty($redirect) and !empty($SESSION->wantsurl) ) {
-                $redirect = $SESSION->wantsurl;
+            if ( ! empty($SESSION->wantsurl) ) {   // Send them where they were going.
+                $goto = $SESSION->wantsurl;
                 unset($SESSION->wantsurl);
-            }
-
-            if (!empty($redirect)) {
-                redirect($redirect);
+                redirect($goto);
             }
         }
 

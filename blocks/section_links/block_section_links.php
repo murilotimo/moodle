@@ -81,26 +81,35 @@ class block_section_links extends block_base {
 
         $course = $this->page->course;
         $courseformat = course_get_format($course);
-        $numsections = $courseformat->get_last_section_number();
+        $courseformatoptions = $courseformat->get_format_options();
         $context = context_course::instance($course->id);
 
         // Course format options 'numsections' is required to display the block.
-        if (empty($numsections)) {
+        if (empty($courseformatoptions['numsections'])) {
             return $this->content;
         }
 
+        // Prepare the highlight value.
+        if ($course->format == 'weeks') {
+            $highlight = ceil((time() - $course->startdate) / 604800);
+        } else if ($course->format == 'topics') {
+            $highlight = $course->marker;
+        } else {
+            $highlight = 0;
+        }
+
         // Prepare the increment value.
-        if (!empty($config->numsections1) and ($numsections > $config->numsections1)) {
+        if (!empty($config->numsections1) and ($courseformatoptions['numsections'] > $config->numsections1)) {
             $inc = $config->incby1;
-        } else if ($numsections > 22) {
+        } else if ($courseformatoptions['numsections'] > 22) {
             $inc = 2;
         } else {
             $inc = 1;
         }
-        if (!empty($config->numsections2) and ($numsections > $config->numsections2)) {
+        if (!empty($config->numsections2) and ($courseformatoptions['numsections'] > $config->numsections2)) {
             $inc = $config->incby2;
         } else {
-            if ($numsections > 40) {
+            if ($courseformatoptions['numsections'] > 40) {
                 $inc = 5;
             }
         }
@@ -110,9 +119,8 @@ class block_section_links extends block_base {
         $canviewhidden = has_capability('moodle/course:update', $context);
         $coursesections = $courseformat->get_sections();
         $coursesectionscount = count($coursesections);
-        $sectiontojumpto = false;
         for ($i = $inc; $i <= $coursesectionscount; $i += $inc) {
-            if ($i > $numsections || !isset($coursesections[$i])) {
+            if ($i > $courseformatoptions['numsections'] || !isset($coursesections[$i])) {
                 continue;
             }
             $section = $coursesections[$i];
@@ -120,16 +128,16 @@ class block_section_links extends block_base {
                 $sections[$i] = (object)array(
                     'section' => $section->section,
                     'visible' => $section->visible,
-                    'highlight' => false
+                    'highlight' => ($section->section == $highlight)
                 );
-                if ($courseformat->is_section_current($section)) {
-                    $sections[$i]->highlight = true;
-                    $sectiontojumpto = $section->section;
-                }
             }
         }
 
         if (!empty($sections)) {
+            $sectiontojumpto = false;
+            if ($highlight && isset($sections[$highlight]) && ($sections[$highlight]->visible || $canviewhidden)) {
+                $sectiontojumpto = $highlight;
+            }
             // Render the sections.
             $renderer = $this->page->get_renderer('block_section_links');
             $this->content->text = $renderer->render_section_links($this->page->course, $sections, $sectiontojumpto);

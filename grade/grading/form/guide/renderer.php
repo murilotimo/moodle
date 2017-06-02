@@ -228,7 +228,7 @@ class gradingform_guide_renderer extends plugin_renderer_base {
             $remarkparams = array(
                 'name' => '{NAME}[criteria][{CRITERION-id}][remark]',
                 'id' => $remarkid,
-                'cols' => '65', 'rows' => '5', 'class' => 'markingguideremark form-control',
+                'cols' => '65', 'rows' => '5', 'class' => 'markingguideremark',
                 'aria-labelledby' => '{NAME}-remarklabel{CRITERION-id}'
             );
 
@@ -236,11 +236,10 @@ class gradingform_guide_renderer extends plugin_renderer_base {
             $input = html_writer::tag('textarea', s($currentremark), $remarkparams);
 
             // Show the frequently-used comments chooser only if there are defined entries.
-            $commentchooser = '';
             if (!empty($comments)) {
                 // Frequently used comments chooser.
                 $chooserbuttonid = 'criteria-' . $criterion['id'] . '-commentchooser';
-                $commentchooserparams = array('id' => $chooserbuttonid, 'class' => 'commentchooser btn btn-secondary');
+                $commentchooserparams = array('id' => $chooserbuttonid, 'class' => 'commentchooser');
                 $commentchooser = html_writer::tag('button', get_string('insertcomment', 'gradingform_guide'),
                     $commentchooserparams);
 
@@ -249,7 +248,7 @@ class gradingform_guide_renderer extends plugin_renderer_base {
                 foreach ($comments as $id => $comment) {
                     $commentoption = new stdClass();
                     $commentoption->id = $id;
-                    $commentoption->description = $comment['description'];
+                    $commentoption->description = s($comment['description']);
                     $commentoptions[] = $commentoption;
                 }
 
@@ -274,7 +273,7 @@ class gradingform_guide_renderer extends plugin_renderer_base {
             $scoreinputparams = array(
                 'type' => 'text',
                 'name' => '{NAME}[criteria][{CRITERION-id}][score]',
-                'class' => $scoreclass . ' form-control',
+                'class' => $scoreclass,
                 'id' => '{NAME}-criteria-{CRITERION-id}-score',
                 'size' => '3',
                 'value' => $currentscore,
@@ -535,7 +534,7 @@ class gradingform_guide_renderer extends plugin_renderer_base {
         }
         $html = html_writer::start_tag('div', array('class' => 'options'));
         $html .= html_writer::tag('div', get_string('guideoptions', 'gradingform_guide'), array('class' => 'optionsheading'));
-        $attrs = array('type' => 'hidden', 'name' => '{NAME}[options][optionsset]', 'value' => 1, 'class' => 'form-control');
+        $attrs = array('type' => 'hidden', 'name' => '{NAME}[options][optionsset]', 'value' => 1);
         $html .= html_writer::empty_tag('input', $attrs);
         foreach ($options as $option => $value) {
             $html .= html_writer::start_tag('div', array('class' => 'option '.$option));

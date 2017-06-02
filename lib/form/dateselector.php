@@ -128,24 +128,20 @@ class MoodleQuickForm_date_selector extends MoodleQuickForm_group {
         $this->_elements = array();
 
         $dateformat = $calendartype->get_date_order($this->_options['startyear'], $this->_options['stopyear']);
-        // Reverse date element (Day, Month, Year), in RTL mode.
-        if (right_to_left()) {
-            $dateformat = array_reverse($dateformat);
-        }
         foreach ($dateformat as $key => $value) {
             // E_STRICT creating elements without forms is nasty because it internally uses $this
-            $this->_elements[] = $this->createFormElement('select', $key, get_string($key, 'form'), $value, $this->getAttributes(), true);
+            $this->_elements[] = @MoodleQuickForm::createElement('select', $key, get_string($key, 'form'), $value, $this->getAttributes(), true);
         }
         // The YUI2 calendar only supports the gregorian calendar type so only display the calendar image if this is being used.
         if ($calendartype->get_name() === 'gregorian') {
             $image = $OUTPUT->pix_icon('i/calendar', get_string('calendar', 'calendar'), 'moodle');
-            $this->_elements[] = $this->createFormElement('link', 'calendar',
+            $this->_elements[] = @MoodleQuickForm::createElement('link', 'calendar',
                     null, '#', $image,
                     array('class' => 'visibleifjs'));
         }
         // If optional we add a checkbox which the user can use to turn if on
         if ($this->_options['optional']) {
-            $this->_elements[] = $this->createFormElement('checkbox', 'enabled', null, get_string('enable'), $this->getAttributes(), true);
+            $this->_elements[] = @MoodleQuickForm::createElement('checkbox', 'enabled', null, get_string('enable'), $this->getAttributes(), true);
         }
         foreach ($this->_elements as $element){
             if (method_exists($element, 'setHiddenLabel')){
@@ -164,7 +160,6 @@ class MoodleQuickForm_date_selector extends MoodleQuickForm_group {
      * @return bool
      */
     function onQuickFormEvent($event, $arg, &$caller) {
-        $this->setMoodleForm($caller);
         switch ($event) {
             case 'updateValue':
                 // Constant values override both default and submitted ones
@@ -274,7 +269,7 @@ class MoodleQuickForm_date_selector extends MoodleQuickForm_group {
                 $valuearray += $thisexport;
             }
         }
-        if (count($valuearray) && isset($valuearray['year'])) {
+        if (count($valuearray)){
             if($this->_options['optional']) {
                 // If checkbox is on, the value is zero, so go no further
                 if(empty($valuearray['enabled'])) {

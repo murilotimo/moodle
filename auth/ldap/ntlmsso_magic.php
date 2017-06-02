@@ -6,7 +6,7 @@
 // of the webserver.
 define('NO_MOODLE_COOKIES', true);
 
-require(__DIR__.'/../../config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 
 //HTTPS is required in this page when $CFG->loginhttps enabled
 $PAGE->https_required();

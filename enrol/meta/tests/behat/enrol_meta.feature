@@ -31,10 +31,11 @@ Feature: Enrolments are synchronised with meta courses
     And I log in as "admin"
     And I navigate to "Manage enrol plugins" node in "Site administration > Plugins > Enrolments"
     And I click on "Enable" "link" in the "Course meta link" "table_row"
-    And I am on course index
+    And I am on homepage
+    And I follow "Courses"
 
   Scenario: Add meta enrolment instance without groups
-    When I am on "Course 3" course homepage
+    When I follow "Course 3"
     And I add "Course meta link" enrolment method with:
       | Link course  | C1C1 |
     And I navigate to "Enrolled users" node in "Course administration > Users"
@@ -43,11 +44,11 @@ Feature: Enrolments are synchronised with meta courses
     And I should not see "Groupcourse" in the "table.userenrolment" "css_element"
 
   Scenario: Add meta enrolment instance with groups
-    When I am on "Course 3" course homepage
+    When I follow "Course 3"
     And I add "Course meta link" enrolment method with:
       | Link course  | C1C1      |
       | Add to group | Groupcourse 1 |
-    And I am on "Course 3" course homepage
+    And I follow "Course 3"
     And I add "Course meta link" enrolment method with:
       | Link course  | C2C2      |
       | Add to group | Groupcourse 2 |
@@ -62,7 +63,7 @@ Feature: Enrolments are synchronised with meta courses
     And I should not see "Groupcourse 2" in the "Student 4" "table_row"
 
   Scenario: Add meta enrolment instance with auto-created groups
-    When I am on "Course 3" course homepage
+    When I follow "Course 3"
     And I add "Course meta link" enrolment method with:
       | Link course  | C1C1      |
       | Add to group | Create new group |
@@ -75,11 +76,11 @@ Feature: Enrolments are synchronised with meta courses
     And the "Groups" select box should contain "Course 1 course (4)"
 
   Scenario: Backup and restore of meta enrolment instance
-    When I am on "Course 3" course homepage
+    When I follow "Course 3"
     And I add "Course meta link" enrolment method with:
       | Link course  | C1C1      |
       | Add to group | Groupcourse 1 |
-    And I am on "Course 3" course homepage
+    And I follow "Course 3"
     And I add "Course meta link" enrolment method with:
       | Link course  | C2C2      |
     When I backup "Course 3" course using this options:
@@ -93,7 +94,8 @@ Feature: Enrolments are synchronised with meta courses
     And I press "Next"
     And I press "Perform restore"
     And I trigger cron
-    And I am on course index
+    And I am on homepage
+    And I follow "Courses"
     And I follow "Course 4"
     And I navigate to "Enrolment methods" node in "Course administration > Users"
     Then I should see "Course meta link (Course 1)"

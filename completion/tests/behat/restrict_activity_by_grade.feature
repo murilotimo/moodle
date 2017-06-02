@@ -18,7 +18,9 @@ Feature: Restrict activity availability through grade conditions
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    #And I am on site homepage
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | Grade assignment |
       | Description | Grade this assignment to revoke restriction on restricted assignment |
@@ -39,10 +41,10 @@ Feature: Restrict activity availability through grade conditions
     And I press "Save and return to course"
     And I log out
     When I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I am on site homepage
+    And I follow "Course 1"
     Then I should see "Not available unless: You achieve a required score in Grade assignment"
-    And "Test page name" activity should be dimmed
-    And "Test page name" "link" should not exist
+    And "Test page name" activity should be hidden
     And I follow "Grade assignment"
     And I press "Add submission"
     And I set the following fields to these values:
@@ -51,9 +53,10 @@ Feature: Restrict activity availability through grade conditions
     And I should see "Submitted for grading"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    And I am on site homepage
+    And I follow "Course 1"
     And I follow "Grade assignment"
-    And I navigate to "View all submissions" in current page administration
+    And I follow "View all submissions"
     And I click on "Grade" "link" in the "Student First" "table_row"
     And I set the following fields to these values:
       | Grade | 21 |
@@ -62,6 +65,7 @@ Feature: Restrict activity availability through grade conditions
     And I follow "Edit settings"
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I am on site homepage
+    And I follow "Course 1"
     And "Test page name" activity should be visible
     And I should not see "Not available unless: You achieve a required score in Grade assignment"

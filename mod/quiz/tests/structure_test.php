@@ -259,9 +259,6 @@ class mod_quiz_structure_testcase extends advanced_testcase {
             ), $structure);
     }
 
-    /**
-     * @expectedException coding_exception
-     */
     public function test_cannot_remove_first_section() {
         $quizobj = $this->create_test_quiz(array(
                 'Heading 1',
@@ -272,6 +269,7 @@ class mod_quiz_structure_testcase extends advanced_testcase {
         $sections = $structure->get_sections();
         $section = reset($sections);
 
+        $this->setExpectedException('coding_exception');
         $structure->remove_section_heading($section->id);
     }
 
@@ -418,9 +416,6 @@ class mod_quiz_structure_testcase extends advanced_testcase {
         ), $structure);
     }
 
-    /**
-     * @expectedException coding_exception
-     */
     public function test_move_slot_too_small_page_number_detected() {
         $quizobj = $this->create_test_quiz(array(
                 array('TF1', 1, 'truefalse'),
@@ -431,12 +426,10 @@ class mod_quiz_structure_testcase extends advanced_testcase {
 
         $idtomove = $structure->get_question_in_slot(3)->slotid;
         $idmoveafter = $structure->get_question_in_slot(2)->slotid;
+        $this->setExpectedException('coding_exception');
         $structure->move_slot($idtomove, $idmoveafter, '1');
     }
 
-    /**
-     * @expectedException coding_exception
-     */
     public function test_move_slot_too_large_page_number_detected() {
         $quizobj = $this->create_test_quiz(array(
                 array('TF1', 1, 'truefalse'),
@@ -447,6 +440,7 @@ class mod_quiz_structure_testcase extends advanced_testcase {
 
         $idtomove = $structure->get_question_in_slot(1)->slotid;
         $idmoveafter = $structure->get_question_in_slot(2)->slotid;
+        $this->setExpectedException('coding_exception');
         $structure->move_slot($idtomove, $idmoveafter, '4');
     }
 
@@ -674,9 +668,6 @@ class mod_quiz_structure_testcase extends advanced_testcase {
         $this->assertFalse($DB->record_exists('question', array('id' => $randomq->id)));
     }
 
-    /**
-     * @expectedException coding_exception
-     */
     public function test_cannot_remove_last_slot_in_a_section() {
         $quizobj = $this->create_test_quiz(array(
                 array('TF1', 1, 'truefalse'),
@@ -686,6 +677,7 @@ class mod_quiz_structure_testcase extends advanced_testcase {
             ));
         $structure = \mod_quiz\structure::create_for_quiz($quizobj);
 
+        $this->setExpectedException('coding_exception');
         $structure->remove_slot(3);
     }
 

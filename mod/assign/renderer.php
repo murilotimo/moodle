@@ -140,7 +140,8 @@ class mod_assign_renderer extends plugin_renderer_base {
         if ($summary->suspendeduser) {
             $supendedclass = ' usersuspended';
             $suspendedstring = get_string('userenrolmentsuspended', 'grades');
-            $suspendedicon = ' ' . $this->pix_icon('i/enrolmentsuspended', $suspendedstring);
+            $suspendedicon = ' ' . html_writer::empty_tag('img', array('src' => $this->pix_url('i/enrolmentsuspended'),
+                'title' => $suspendedstring, 'alt' => $suspendedstring, 'class' => 'usersuspendedicon'));
         }
         $o .= $this->output->container_start('usersummary');
         $o .= $this->output->box_start('boxaligncenter usersummarysection'.$supendedclass);
@@ -388,7 +389,7 @@ class mod_assign_renderer extends plugin_renderer_base {
             $cell1 = new html_table_cell(get_string('gradedby', 'assign'));
             $userdescription = $this->output->user_picture($status->grader) .
                                $this->output->spacer(array('width'=>30)) .
-                               fullname($status->grader, $status->canviewfullnames);
+                               fullname($status->grader);
             $cell2 = new html_table_cell($userdescription);
             $row->cells = array($cell1, $cell2);
             $t->data[] = $row;
@@ -634,7 +635,6 @@ class mod_assign_renderer extends plugin_renderer_base {
 
         $t = new html_table();
 
-        $warningmsg = '';
         if ($status->teamsubmissionenabled) {
             $row = new html_table_row();
             $cell1 = new html_table_cell(get_string('submissionteam', 'assign'));
@@ -643,19 +643,13 @@ class mod_assign_renderer extends plugin_renderer_base {
                 $cell2 = new html_table_cell(format_string($group->name, false, $status->context));
             } else if ($status->preventsubmissionnotingroup) {
                 if (count($status->usergroups) == 0) {
-                    $notification = new \core\output\notification(get_string('noteam', 'assign'), 'error');
-                    $notification->set_show_closebutton(false);
                     $cell2 = new html_table_cell(
-                        $this->output->render($notification)
+                        html_writer::span(get_string('noteam', 'assign'), 'alert alert-error')
                     );
-                    $warningmsg = $this->output->notification(get_string('noteam_desc', 'assign'), 'error');
                 } else if (count($status->usergroups) > 1) {
-                    $notification = new \core\output\notification(get_string('multipleteams', 'assign'), 'error');
-                    $notification->set_show_closebutton(false);
                     $cell2 = new html_table_cell(
-                        $this->output->render($notification)
+                        html_writer::span(get_string('multipleteams', 'assign'), 'alert alert-error')
                     );
-                    $warningmsg = $this->output->notification(get_string('multipleteams_desc', 'assign'), 'error');
                 }
             } else {
                 $cell2 = new html_table_cell(get_string('defaultteam', 'assign'));
@@ -912,7 +906,6 @@ class mod_assign_renderer extends plugin_renderer_base {
             }
         }
 
-        $o .= $warningmsg;
         $o .= html_writer::table($t);
         $o .= $this->output->box_end();
 
@@ -1420,7 +1413,7 @@ class mod_assign_renderer extends plugin_renderer_base {
             $result .= '<li yuiConfig=\'' . json_encode($yuiconfig) . '\'>' .
                        '<div>' . $image . ' ' .
                                  $file->fileurl . ' ' .
-                                 $plagiarismlinks . ' ' .
+                                 $plagiarismlinks .
                                  $file->portfoliobutton . '</div>' .
                        '</li>';
         }

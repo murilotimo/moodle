@@ -50,14 +50,7 @@ class behat_mod_data extends behat_base {
     public function i_add_a_field_to_database_and_i_fill_the_form_with($fieldtype, $activityname, TableNode $fielddata) {
 
         $this->execute("behat_general::click_link", $this->escape($activityname));
-
-        // Open "Fields" tab if it is not already open.
-        $fieldsstr = get_string('fields', 'mod_data');
-        $xpath = '//ul[contains(@class,\'nav-tabs\')]//*[contains(@class,\'active\') and contains(normalize-space(.), \'' .
-            $fieldsstr . '\')]';
-        if (!$this->getSession()->getPage()->findAll('xpath', $xpath)) {
-            $this->execute("behat_general::i_click_on_in_the", array($fieldsstr, 'link', '.nav-tabs', 'css_element'));
-        }
+        $this->execute("behat_general::click_link", get_string('fields', 'mod_data'));
 
         $this->execute('behat_forms::i_set_the_field_to', array('newtype', $this->escape($fieldtype)));
 
@@ -82,8 +75,7 @@ class behat_mod_data extends behat_base {
     public function i_add_an_entry_to_database_with($activityname, TableNode $entrydata) {
 
         $this->execute("behat_general::click_link", $this->escape($activityname));
-        $this->execute("behat_navigation::i_navigate_to_node_in", array(get_string('add', 'mod_data'),
-            get_string('pluginadministration', 'mod_data')));
+        $this->execute("behat_general::click_link", get_string('add', 'mod_data'));
 
         $this->execute("behat_forms::i_set_the_following_fields_to_these_values", $entrydata);
     }

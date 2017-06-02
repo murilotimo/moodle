@@ -17,7 +17,8 @@ Feature: Import course's contents into another course
       | teacher1 | C1 | editingteacher |
       | teacher1 | C2 | editingteacher |
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Database" to section "1" and I fill the form with:
       | Name | Test database name |
       | Description | Test database description |
@@ -26,7 +27,6 @@ Feature: Import course's contents into another course
       | Description | Test forum description |
     And I add the "Comments" block
     And I add the "Recent blog entries" block
-    And I turn editing mode off
     When I import "Course 1" course into "Course 2" course using this options:
     Then I should see "Test database name"
     And I should see "Test forum name"

@@ -40,7 +40,6 @@ class mod_assign_generator extends testing_module_generator {
             'allowsubmissionsfromdate'          => 0,
             'grade'                             => 100,
             'cutoffdate'                        => 0,
-            'gradingduedate'                    => 0,
             'teamsubmission'                    => 0,
             'requireallteammemberssubmit'       => 0,
             'teamsubmissiongroupingid'          => 0,

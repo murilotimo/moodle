@@ -24,12 +24,6 @@
 
 class data_field_url extends data_field_base {
     var $type = 'url';
-    /**
-     * priority for globalsearch indexing
-     *
-     * @var int
-     */
-    protected static $priority = self::MIN_PRIORITY;
 
     function display_add_field($recordid = 0, $formdata = null) {
         global $CFG, $DB, $OUTPUT, $PAGE;
@@ -65,11 +59,12 @@ class data_field_url extends data_field_base {
 
         $autolinkable = !empty($this->field->param1) && empty($this->field->param2);
 
-        $str = '<div title="' . s($this->field->description) . '" class="form-inline">';
+        $str = '<div title="' . s($this->field->description) . '">';
 
         $label = '<label for="' . $fieldid . '"><span class="accesshide">' . $this->field->name . '</span>';
         if ($this->field->required) {
-            $image = $OUTPUT->pix_icon('req', get_string('requiredelement', 'form'));
+            $image = html_writer::img($OUTPUT->pix_url('req'), get_string('requiredelement', 'form'),
+                                      array('class' => 'req', 'title' => get_string('requiredelement', 'form')));
             if ($autolinkable) {
                 $label .= html_writer::div(get_string('requiredelement', 'form'), 'accesshide');
             } else {
@@ -86,22 +81,19 @@ class data_field_url extends data_field_base {
             }
             $str .= '</td><td>';
             $str .= $label;
-            $str .= '<input type="text" name="field_' . $this->field->id . '_0" id="' . $fieldid . '" value="' . s($url) . '" ' .
-                    'size="40" class="form-control d-inline"/>';
-            $str .= '<button class="btn btn-secondary m-l-1" id="filepicker-button-' . $options->client_id . '" ' .
-                    'style="display:none">' . $straddlink . '</button></td></tr>';
-            $str .= '<tr><td align="right"><span class="mod-data-input">' . get_string('text', 'data') . ':</span></td><td>';
-            $str .= '<input type="text" name="field_' . $this->field->id . '_1" id="field_' . $this->field->id . '_1" ' .
-                    'value="' . s($text) . '" size="40" class="form-control d-inline"/></td></tr>';
+            $str .= '<input type="text" name="field_'.$this->field->id.'_0" id="'.$fieldid.'" value="'.s($url).'" size="60" />';
+            $str .= '<button id="filepicker-button-'.$options->client_id.'" style="display:none">'.$straddlink.'</button></td></tr>';
+            $str .= '<tr><td align="right"><span class="mod-data-input">'.get_string('text', 'data').':</span></td><td>';
+            $str .= '<input type="text" name="field_'.$this->field->id.'_1" id="field_'.$this->field->id.'_1" value="'.s($text).'"';
+            $str .= ' size="60" /></td></tr>';
             $str .= '</table>';
         } else {
             // Just the URL field
             $str .= $label;
             $str .= '<input type="text" name="field_'.$this->field->id.'_0" id="'.$fieldid.'" value="'.s($url).'"';
-            $str .= ' size="40" class="mod-data-input form-control d-inline" />';
+            $str .= ' size="60" class="mod-data-input" />';
             if (count($options->repositories) > 0) {
-                $str .= '<button id="filepicker-button-' . $options->client_id . '" class="visibleifjs btn btn-secondary m-l-1">' .
-                        $straddlink . '</button>';
+                $str .= '<button id="filepicker-button-'.$options->client_id.'" class="visibleifjs">'.$straddlink.'</button>';
             }
         }
 
@@ -115,17 +107,12 @@ class data_field_url extends data_field_base {
     }
 
     function display_search_field($value = '') {
-        return '<label class="accesshide" for="f_' . $this->field->id . '">' . get_string('fieldname', 'data') . '</label>' .
-               '<input type="text" size="16" id="f_' . $this->field->id . '" '.
-               ' name="f_' . $this->field->id . '" value="' . s($value) . '" class="form-control d-inline"/>';
+        return '<label class="accesshide" for="f_'.$this->field->id.'">' . get_string('fieldname', 'data') . '</label>' .
+               '<input type="text" size="16" id="f_'.$this->field->id.'" name="f_'.$this->field->id.'" value="'.s($value).'" />';
     }
 
-    public function parse_search_field($defaults = null) {
-        $param = 'f_'.$this->field->id;
-        if (empty($defaults[$param])) {
-            $defaults = array($param => '');
-        }
-        return optional_param($param, $defaults[$param], PARAM_NOTAGS);
+    function parse_search_field() {
+        return optional_param('f_'.$this->field->id, '', PARAM_NOTAGS);
     }
 
     function generate_sql($tablealias, $value) {
@@ -170,14 +157,6 @@ class data_field_url extends data_field_base {
             return $str;
         }
         return false;
-    }
-
-    function update_content_import($recordid, $value, $name='') {
-        $values = explode(" ", $value, 2);
-
-        foreach ($values as $index => $value) {
-            $this->update_content($recordid, $value, $name . '_' . $index);
-        }
     }
 
     function update_content($recordid, $value, $name='') {
@@ -228,18 +207,4 @@ class data_field_url extends data_field_base {
         return $record->content . " " . $record->content1;
     }
 
-    /**
-     * Return the plugin configs for external functions.
-     *
-     * @return array the list of config parameters
-     * @since Moodle 3.3
-     */
-    public function get_config_for_external() {
-        // Return all the config parameters.
-        $configs = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $configs["param$i"] = $this->field->{"param$i"};
-        }
-        return $configs;
-    }
 }

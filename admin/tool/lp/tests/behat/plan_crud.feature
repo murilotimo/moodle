@@ -26,7 +26,9 @@ Feature: Manage plearning plan
       | shortname | description |
       | Science template | science template description |
     And I follow "Home"
-    And I navigate to "Competencies > Learning plan templates" in site administration
+    And I expand "Site administration" node
+    And I expand "Competencies" node
+    And I follow "Learning plan templates"
     And I click on ".template-userplans" "css_element" in the "Science template" "table_row"
     And I click on ".form-autocomplete-downarrow" "css_element"
     And I click on "Admin" item in the autocomplete list
@@ -50,7 +52,9 @@ Feature: Manage plearning plan
       | student-plan1 | COHORTPLAN |
       | student-plan2 | COHORTPLAN |
     And I follow "Home"
-    And I navigate to "Competencies > Learning plan templates" in site administration
+    And I expand "Site administration" node
+    And I expand "Competencies" node
+    And I follow "Learning plan templates"
     And I click on ".template-cohorts" "css_element" in the "Science template cohort" "table_row"
     And I click on ".form-autocomplete-downarrow" "css_element"
     And I click on "cohort plan" item in the autocomplete list
@@ -94,7 +98,6 @@ Feature: Manage plearning plan
     And I click on "Delete" of edit menu in the "comp1" row
     And "Confirm" "dialogue" should be visible
     And I click on "Confirm" "button"
-    And I wait until the page is ready
     And "comp1" "table_row" should not exist
 
   Scenario: Edit a learning plan
@@ -126,5 +129,4 @@ Feature: Manage plearning plan
     And I click on "Delete" of edit menu in the "Science plan Year-4" row
     And "Confirm" "dialogue" should be visible
     When I click on "Delete" "button"
-    And I wait until the page is ready
     Then I should not see "Science plan Year-4"

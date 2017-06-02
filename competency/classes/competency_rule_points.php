@@ -77,7 +77,7 @@ class competency_rule_points extends competency_rule {
         $sql = "userid = :userid
             AND proficiency = :proficiency
             AND competencyid $insql";
-        $params['userid'] = $usercompetency->get('userid');
+        $params['userid'] = $usercompetency->get_userid();
         $params['proficiency'] = 1;
         $ucs = user_competency::get_records_select($sql, $params, '', 'competencyid');
 
@@ -133,7 +133,7 @@ class competency_rule_points extends competency_rule {
         foreach ($config->competencies as $competency) {
 
             // Cannot include self.
-            if ($competency->id == $this->competency->get('id')) {
+            if ($competency->id == $this->competency->get_id()) {
                 return false;
             }
 
@@ -204,7 +204,7 @@ class competency_rule_points extends competency_rule {
             foreach ($ruleconfig['competencies'] as $key => $rulecomp) {
                 $rulecmpid = $rulecomp['id'];
                 if (array_key_exists($rulecmpid, $mappings)) {
-                    $ruleconfig['competencies'][$key]['id'] = $mappings[$rulecmpid]->get('id');
+                    $ruleconfig['competencies'][$key]['id'] = $mappings[$rulecmpid]->get_id();
                 } else {
                     throw new coding_exception("The competency id is not found in the matchids.");
                 }

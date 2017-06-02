@@ -45,7 +45,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
 
     initializer: function() {
         // Set group for parent class
-        this.groups = [CSS.SECTIONDRAGGABLE];
+        this.groups = [ CSS.SECTIONDRAGGABLE ];
         this.samenodeclass = M.course.format.get_sectionwrapperclass();
         this.parentnodeclass = M.course.format.get_containerclass();
 
@@ -113,8 +113,8 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                             moveup.next('br').remove();
                         }
 
-                        if (moveup.ancestor('.section_action_menu') && moveup.ancestor().get('nodeName').toLowerCase() == 'li') {
-                            moveup.ancestor().remove();
+                        if (moveup.ancestor('.section_action_menu')) {
+                            moveup.ancestor('li').remove();
                         } else {
                             moveup.remove();
                         }
@@ -126,9 +126,8 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                             movedown.next('br').remove();
                         }
 
-                        var movedownParentType = movedown.ancestor().get('nodeName').toLowerCase();
-                        if (movedown.ancestor('.section_action_menu') && movedownParentType == 'li') {
-                            movedown.ancestor().remove();
+                        if (movedown.ancestor('.section_action_menu')) {
+                            movedown.ancestor('li').remove();
                         } else {
                             movedown.remove();
                         }
@@ -153,7 +152,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
         containernode.addClass(M.course.format.get_containerclass());
         var sectionnode = Y.Node.create('<' + M.course.format.get_sectionwrappernode() +
                 '></' + M.course.format.get_sectionwrappernode() + '>');
-        sectionnode.addClass(M.course.format.get_sectionwrapperclass());
+        sectionnode.addClass( M.course.format.get_sectionwrapperclass());
         sectionnode.setStyle('margin', 0);
         sectionnode.setContent(drag.get('node').get('innerHTML'));
         containernode.appendChild(sectionnode);
@@ -247,9 +246,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                             new M.core.ajaxException(responsetext);
                         }
                         M.course.format.process_sections(Y, sectionlist, responsetext, loopstart, loopend);
-                    } catch (e) {
-                        // Ignore.
-                    }
+                    } catch (e) {}
 
                     // Update all of the section IDs - first unset them, then set them
                     // to avoid duplicates in the DOM.
@@ -290,7 +287,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                     lightbox.hide();
                 }
             },
-            context: this
+            context:this
         });
     }
 
@@ -329,6 +326,8 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
         this.groups = ['resource'];
         this.samenodeclass = CSS.ACTIVITY;
         this.parentnodeclass = CSS.SECTION;
+        this.resourcedraghandle = this.get_drag_handle(M.util.get_string('movecoursemodule', 'moodle'),
+                CSS.EDITINGMOVE, CSS.ICONCLASS, true);
 
         this.samenodelabel = {
             identifier: 'afterresource',
@@ -421,9 +420,7 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
             // Replace move icons
             var move = resourcesnode.one('a.' + CSS.EDITINGMOVE);
             if (move) {
-                var sr = move.getData('sectionreturn');
-                move.replace(this.get_drag_handle(M.util.get_string('movecoursemodule', 'moodle'),
-                             CSS.EDITINGMOVE, CSS.ICONCLASS, true).setAttribute('data-sectionreturn', sr));
+                move.replace(this.resourcedraghandle.cloneNode(true));
             }
         }, this);
     },
@@ -500,7 +497,7 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
                     // TODO: revert nodes location
                 }
             },
-            context: this
+            context:this
         });
     }
 }, {

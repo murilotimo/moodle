@@ -1,7 +1,7 @@
 var SELECTORS = {
     CREATENEWQUESTION: 'div.createnewquestion',
     CREATENEWQUESTIONFORM: 'div.createnewquestion form',
-    CHOOSERDIALOGUE: 'div.chooserdialoguebody',
+    CHOOSERDIALOGUE: 'div.chooserdialogue',
     CHOOSERHEADER: 'div.choosertitle'
 };
 

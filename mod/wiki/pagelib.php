@@ -915,7 +915,7 @@ class page_wiki_create extends page_wiki {
         global $PAGE;
         $this->action = $action;
 
-        require_once(__DIR__ . '/create_form.php');
+        require_once(dirname(__FILE__) . '/create_form.php');
         $url = new moodle_url('/mod/wiki/create.php', array('action' => 'create', 'wid' => $PAGE->activityrecord->id, 'group' => $this->gid, 'uid' => $this->uid));
         $formats = wiki_get_formats();
         $options = array('formats' => $formats, 'defaultformat' => $PAGE->activityrecord->defaultformat, 'forceformat' => $PAGE->activityrecord->forceformat, 'groups' => $this->groups);
@@ -979,6 +979,14 @@ class page_wiki_create extends page_wiki {
 class page_wiki_preview extends page_wiki_edit {
 
     private $newcontent;
+
+    function __construct($wiki, $subwiki, $cm) {
+        global $PAGE, $CFG, $OUTPUT;
+        parent::__construct($wiki, $subwiki, $cm);
+        $buttons = $OUTPUT->update_module_button($cm->id, 'wiki');
+        $PAGE->set_button($buttons);
+
+    }
 
     function print_header() {
         global $PAGE, $CFG;
@@ -1282,6 +1290,7 @@ class page_wiki_history extends page_wiki {
                 $table = new html_table();
                 $table->head = array('', get_string('version'), get_string('user'), get_string('modified'), '');
                 $table->data = $contents;
+                $table->attributes['class'] = 'mdl-align';
 
                 echo html_writer::table($table);
 
@@ -1313,15 +1322,15 @@ class page_wiki_history extends page_wiki {
 
                 $table->head = array(get_string('diff', 'wiki') . $icon, get_string('version'), get_string('user'), get_string('modified'), '');
                 $table->data = $contents;
-                $table->attributes['class'] = 'table generaltable';
+                $table->attributes['class'] = 'generaltable mdl-align';
                 $table->rowclasses = $rowclass;
 
                 // Print the form.
                 echo html_writer::start_tag('form', array('action'=>new moodle_url('/mod/wiki/diff.php'), 'method'=>'get', 'id'=>'diff'));
                 echo html_writer::tag('div', html_writer::empty_tag('input', array('type'=>'hidden', 'name'=>'pageid', 'value'=>$pageid)));
                 echo html_writer::table($table);
-                echo html_writer::start_tag('div');
-                echo html_writer::empty_tag('input', array('type'=>'submit', 'class'=>'wiki_form-button btn btn-secondary', 'value'=>get_string('comparesel', 'wiki')));
+                echo html_writer::start_tag('div', array('class'=>'mdl-align'));
+                echo html_writer::empty_tag('input', array('type'=>'submit', 'class'=>'wiki_form-button', 'value'=>get_string('comparesel', 'wiki')));
                 echo html_writer::end_tag('div');
                 echo html_writer::end_tag('form');
             }
@@ -1335,11 +1344,11 @@ class page_wiki_history extends page_wiki {
             //print_paging_bar($vcount, $paging, $rowsperpage,$CFG->wwwroot.'/mod/wiki/history.php?pageid='.$pageid.'&amp;','paging');
             } else {
             $link = new moodle_url('/mod/wiki/history.php', array('pageid' => $pageid));
-            $OUTPUT->container(html_writer::link($link->out(false), get_string('viewperpage', 'wiki', $this->rowsperpage)));
+            $OUTPUT->container(html_writer::link($link->out(false), get_string('viewperpage', 'wiki', $this->rowsperpage)), 'mdl-align');
         }
         if ($vcount > $this->rowsperpage && !$this->allversion) {
             $link = new moodle_url('/mod/wiki/history.php', array('pageid' => $pageid, 'allversion' => 1));
-            $OUTPUT->container(html_writer::link($link->out(false), get_string('viewallhistory', 'wiki')));
+            $OUTPUT->container(html_writer::link($link->out(false), get_string('viewallhistory', 'wiki')), 'mdl-align');
         }
     }
 
@@ -1483,7 +1492,7 @@ class page_wiki_map extends page_wiki {
 
         $table = new html_table();
         $table->head = array(get_string('contributions', 'wiki') . $OUTPUT->help_icon('contributions', 'wiki'));
-        $table->attributes['class'] = 'generalbox table';
+        $table->attributes['class'] = 'wiki_editor generalbox';
         $table->data = array();
         $table->rowclasses = array();
 
@@ -1547,7 +1556,7 @@ class page_wiki_map extends page_wiki {
         $fromlinks = wiki_get_linked_from_pages($page->id);
 
         $table = new html_table();
-        $table->attributes['class'] = 'wiki_navigation_from table';
+        $table->attributes['class'] = 'wiki_navigation_from';
         $table->head = array(get_string('navigationfrom', 'wiki') . $OUTPUT->help_icon('navigationfrom', 'wiki') . ':');
         $table->data = array();
         $table->rowclasses = array();
@@ -1555,12 +1564,13 @@ class page_wiki_map extends page_wiki {
             $lpage = wiki_get_page($link->frompageid);
             $link = new moodle_url('/mod/wiki/view.php', array('pageid' => $lpage->id));
             $table->data[] = array(html_writer::link($link->out(false), format_string($lpage->title)));
+            $table->rowclasses[] = 'mdl-align';
         }
 
-        $table_left = $OUTPUT->container(html_writer::table($table), 'col-md-6 span6');
+        $table_left = html_writer::table($table);
 
         $table = new html_table();
-        $table->attributes['class'] = 'wiki_navigation_to table';
+        $table->attributes['class'] = 'wiki_navigation_to';
         $table->head = array(get_string('navigationto', 'wiki') . $OUTPUT->help_icon('navigationto', 'wiki') . ':');
         $table->data = array();
         $table->rowclasses = array();
@@ -1573,9 +1583,10 @@ class page_wiki_map extends page_wiki {
                 $viewlink = new moodle_url('/mod/wiki/view.php', array('pageid' => $lpage->id));
                 $table->data[] = array(html_writer::link($viewlink->out(false), format_string($lpage->title)));
             }
+            $table->rowclasses[] = 'mdl-align';
         }
-        $table_right = $OUTPUT->container(html_writer::table($table), 'col-md-6 span6');
-        echo $OUTPUT->container($table_left . $table_right, 'wiki_navigation_container row');
+        $table_right = html_writer::table($table);
+        echo $OUTPUT->container($table_left . $table_right, 'wiki_navigation_container');
     }
 
     /**
@@ -1601,7 +1612,7 @@ class page_wiki_map extends page_wiki {
 
         $table = new html_table();
         $table->head = array(get_string('pageindex', 'wiki') . $OUTPUT->help_icon('pageindex', 'wiki'));
-        $table->attributes['class'] = 'generalbox table';
+        $table->attributes['class'] = 'wiki_editor generalbox';
         $table->data[] = array($this->render_navigation_node($tree));
 
         echo html_writer::table($table);
@@ -1640,7 +1651,8 @@ class page_wiki_map extends page_wiki {
 
         $table = new html_table();
         $table->head = array(get_string('pagelist', 'wiki') . $OUTPUT->help_icon('pagelist', 'wiki'));
-        $table->attributes['class'] = 'generalbox table';
+        $table->attributes['class'] = 'wiki_editor generalbox';
+        $table->align = array('center');
         foreach ($stdaux as $key => $elem) {
             $table->data[] = array($key);
             foreach ($elem as $e) {
@@ -1669,7 +1681,7 @@ class page_wiki_map extends page_wiki {
 
         $table = new html_table();
         $table->head = array(get_string('orphaned', 'wiki') . $OUTPUT->help_icon('orphaned', 'wiki'));
-        $table->attributes['class'] = 'generalbox table';
+        $table->attributes['class'] = 'wiki_editor generalbox';
         $table->data = array();
         $table->rowclasses = array();
 
@@ -1705,7 +1717,7 @@ class page_wiki_map extends page_wiki {
 
         $table = new html_table();
         $table->head = array(get_string('updatedpages', 'wiki') . $OUTPUT->help_icon('updatedpages', 'wiki'));
-        $table->attributes['class'] = 'generalbox table';
+        $table->attributes['class'] = 'wiki_editor generalbox';
         $table->data = array();
         $table->rowclasses = array();
 
@@ -1890,7 +1902,7 @@ class page_wiki_restoreversion extends page_wiki {
         $restoreurl = new moodle_url('/mod/wiki/restoreversion.php', $optionsyes);
         $return = new moodle_url('/mod/wiki/viewversion.php', array('pageid'=>$this->page->id, 'versionid'=>$version->id));
 
-        echo $OUTPUT->container_start();
+        echo $OUTPUT->container_start('wiki-form-center');
         echo html_writer::tag('div', get_string('restoreconfirm', 'wiki', $version->version));
         echo $OUTPUT->container_start(false, 'wiki_restoreform');
         echo '<form class="wiki_restore_yes" action="' . $restoreurl . '" method="post" id="restoreversion">';
@@ -1960,7 +1972,7 @@ class page_wiki_deletecomment extends page_wiki {
         $deleteurl = new moodle_url('/mod/wiki/instancecomments.php', $optionsyes);
         $return = new moodle_url('/mod/wiki/comments.php', array('pageid'=>$this->page->id));
 
-        echo $OUTPUT->container_start();
+        echo $OUTPUT->container_start('wiki-form-center');
         echo html_writer::tag('p', $strdeletecheckfull);
         echo $OUTPUT->container_start(false, 'wiki_deletecommentform');
         echo '<form class="wiki_deletecomment_yes" action="' . $deleteurl . '" method="post" id="deletecomment">';
@@ -2133,7 +2145,7 @@ class page_wiki_viewversion extends page_wiki {
             $viewlink = new moodle_url('/user/view.php', array('id' => $userinfo->id));
             $heading .= '&nbsp;&nbsp;&nbsp;<strong>' . get_string('user') . ':</strong>&nbsp;' . html_writer::link($viewlink->out(false), fullname($userinfo));
             $heading .= '&nbsp;&nbsp;&rarr;&nbsp;' . $OUTPUT->user_picture(wiki_get_user_info($pageversion->userid), array('popup' => true)) . '</p>';
-            echo $OUTPUT->container($heading, 'wiki_headingtime', 'wiki_modifieduser');
+            echo $OUTPUT->container($heading, 'wiki_headingtime', 'mdl-align wiki_modifieduser');
             $options = array('swid' => $this->subwiki->id, 'pretty_print' => true, 'pageid' => $this->page->id);
 
             $pageversion->content = file_rewrite_pluginfile_urls($pageversion->content, 'pluginfile.php', $this->modcontext->id, 'mod_wiki', 'attachments', $this->subwiki->id);
@@ -2505,7 +2517,7 @@ class page_wiki_admin extends page_wiki {
         $contents = array();
         $table = new html_table();
         $table->head = array('', get_string('pagename','wiki'));
-        $table->attributes['class'] = 'table generaltable';
+        $table->attributes['class'] = 'generaltable mdl-align';
         $swid = $this->subwiki->id;
         if ($showorphan) {
             if ($orphanedpages = wiki_get_orphaned_pages($swid)) {
@@ -2532,7 +2544,7 @@ class page_wiki_admin extends page_wiki {
 
         echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'option', 'value' => $this->view));
         echo html_writer::table($table);
-        echo html_writer::start_tag('div');
+        echo html_writer::start_tag('div', array('class' => 'mdl-align'));
         if (!$showorphan) {
             echo html_writer::empty_tag('input', array(
                                                      'type'    => 'submit',
@@ -2543,7 +2555,7 @@ class page_wiki_admin extends page_wiki {
             echo html_writer::empty_tag('input', array('type'=>'hidden', 'name'=>'listall', 'value'=>'1'));
             echo html_writer::empty_tag('input', array(
                                                      'type'    => 'submit',
-                                                     'class'   => 'wiki_form-button btn btn-secondary',
+                                                     'class'   => 'wiki_form-button',
                                                      'value'   => get_string('listall', 'wiki'),
                                                      'sesskey' => sesskey()));
         }
@@ -2625,6 +2637,7 @@ class page_wiki_admin extends page_wiki {
                 $table = new html_table();
                 $table->head = array('', get_string('version'), get_string('user'), get_string('modified'), '');
                 $table->data = $contents;
+                $table->attributes['class'] = 'mdl-align';
 
                 echo html_writer::table($table);
             } else {
@@ -2663,7 +2676,7 @@ class page_wiki_admin extends page_wiki {
                 $table = new html_table();
                 $table->head = array(get_string('deleteversions', 'wiki'), get_string('version'), get_string('user'), get_string('modified'), '');
                 $table->data = $contents;
-                $table->attributes['class'] = 'table generaltable';
+                $table->attributes['class'] = 'generaltable mdl-align';
                 $table->rowclasses = $rowclass;
 
                 ///Print the form
@@ -2672,8 +2685,8 @@ class page_wiki_admin extends page_wiki {
                 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'option', 'value' => $this->view));
                 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' =>  sesskey()));
                 echo html_writer::table($table);
-                echo html_writer::start_tag('div');
-                echo html_writer::empty_tag('input', array('type' => 'submit', 'class' => 'wiki_form-button btn btn-secondary', 'value' => get_string('deleteversions', 'wiki')));
+                echo html_writer::start_tag('div', array('class' => 'mdl-align'));
+                echo html_writer::empty_tag('input', array('type' => 'submit', 'class' => 'wiki_form-button', 'value' => get_string('deleteversions', 'wiki')));
                 echo html_writer::end_tag('div');
                 echo html_writer::end_tag('form');
             }

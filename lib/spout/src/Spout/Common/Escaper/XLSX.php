@@ -2,8 +2,6 @@
 
 namespace Box\Spout\Common\Escaper;
 
-use Box\Spout\Common\Singleton;
-
 /**
  * Class XLSX
  * Provides functions to escape and unescape data for XLSX files
@@ -12,25 +10,15 @@ use Box\Spout\Common\Singleton;
  */
 class XLSX implements EscaperInterface
 {
-    use Singleton;
-
-    /** @var string Regex pattern to detect control characters that need to be escaped */
-    protected $escapableControlCharactersPattern;
-
-    /** @var string[] Map containing control characters to be escaped (key) and their escaped value (value) */
+    /** @var string[] Control characters to be escaped */
     protected $controlCharactersEscapingMap;
 
-    /** @var string[] Map containing control characters to be escaped (value) and their escaped value (key) */
-    protected $controlCharactersEscapingReverseMap;
-
     /**
-     * Initializes the singleton instance
+     *
      */
-    protected function init()
+    public function __construct()
     {
-        $this->escapableControlCharactersPattern = $this->getEscapableControlCharactersPattern();
         $this->controlCharactersEscapingMap = $this->getControlCharactersEscapingMap();
-        $this->controlCharactersEscapingReverseMap = array_flip($this->controlCharactersEscapingMap);
     }
 
     /**
@@ -62,20 +50,6 @@ class XLSX implements EscaperInterface
     }
 
     /**
-     * @return string Regex pattern containing all escapable control characters
-     */
-    protected function getEscapableControlCharactersPattern()
-    {
-        // control characters values are from 0 to 1F (hex values) in the ASCII table
-        // some characters should not be escaped though: "\t", "\r" and "\n".
-        return '[\x00-\x08' .
-                // skipping "\t" (0x9) and "\n" (0xA)
-                '\x0B-\x0C' .
-                // skipping "\r" (0xD)
-                '\x0E-\x1F]';
-    }
-
-    /**
      * Builds the map containing control characters to be escaped
      * mapped to their escaped values.
      * "\t", "\r" and "\n" don't need to be escaped.
@@ -88,14 +62,14 @@ class XLSX implements EscaperInterface
     protected function getControlCharactersEscapingMap()
     {
         $controlCharactersEscapingMap = [];
+        $whitelistedControlCharacters = ["\t", "\r", "\n"];
 
         // control characters values are from 0 to 1F (hex values) in the ASCII table
-        for ($charValue = 0x00; $charValue <= 0x1F; $charValue++) {
-            $character = chr($charValue);
-            if (preg_match("/{$this->escapableControlCharactersPattern}/", $character)) {
+        for ($charValue = 0x0; $charValue <= 0x1F; $charValue++) {
+            if (!in_array(chr($charValue), $whitelistedControlCharacters)) {
                 $charHexValue = dechex($charValue);
                 $escapedChar = '_x' . sprintf('%04s' , strtoupper($charHexValue)) . '_';
-                $controlCharactersEscapingMap[$escapedChar] = $character;
+                $controlCharactersEscapingMap[$escapedChar] = chr($charValue);
             }
         }
 
@@ -118,15 +92,7 @@ class XLSX implements EscaperInterface
     protected function escapeControlCharacters($string)
     {
         $escapedString = $this->escapeEscapeCharacter($string);
-
-        // if no control characters
-        if (!preg_match("/{$this->escapableControlCharactersPattern}/", $escapedString)) {
-            return $escapedString;
-        }
-
-        return preg_replace_callback("/({$this->escapableControlCharactersPattern})/", function($matches) {
-            return $this->controlCharactersEscapingReverseMap[$matches[0]];
-        }, $escapedString);
+        return str_replace(array_values($this->controlCharactersEscapingMap), array_keys($this->controlCharactersEscapingMap), $escapedString);
     }
 
     /**
@@ -156,7 +122,6 @@ class XLSX implements EscaperInterface
     protected function unescapeControlCharacters($string)
     {
         $unescapedString = $string;
-
         foreach ($this->controlCharactersEscapingMap as $escapedCharValue => $charValue) {
             // only unescape characters that don't contain the escaped escape character for now
             $unescapedString = preg_replace("/(?<!_x005F)($escapedCharValue)/", $charValue, $unescapedString);

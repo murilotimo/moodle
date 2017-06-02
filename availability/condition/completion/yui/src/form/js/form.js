@@ -23,10 +23,9 @@ M.availability_completion.form.initInner = function(cms) {
 
 M.availability_completion.form.getNode = function(json) {
     // Create HTML structure.
-    var html = '<span class="col-form-label p-r-1"> ' + M.util.get_string('title', 'availability_completion') + '</span>' +
-               ' <span class="availability-group form-group"><label>' +
+    var html = M.util.get_string('title', 'availability_completion') + ' <span class="availability-group"><label>' +
             '<span class="accesshide">' + M.util.get_string('label_cm', 'availability_completion') + ' </span>' +
-            '<select class="custom-select" name="cm" title="' + M.util.get_string('label_cm', 'availability_completion') + '">' +
+            '<select name="cm" title="' + M.util.get_string('label_cm', 'availability_completion') + '">' +
             '<option value="0">' + M.util.get_string('choosedots', 'moodle') + '</option>';
     for (var i = 0; i < this.cms.length; i++) {
         var cm = this.cms[i];
@@ -35,14 +34,13 @@ M.availability_completion.form.getNode = function(json) {
     }
     html += '</select></label> <label><span class="accesshide">' +
                 M.util.get_string('label_completion', 'availability_completion') +
-            ' </span><select class="custom-select" ' +
-                            'name="e" title="' + M.util.get_string('label_completion', 'availability_completion') + '">' +
+            ' </span><select name="e" title="' + M.util.get_string('label_completion', 'availability_completion') + '">' +
             '<option value="1">' + M.util.get_string('option_complete', 'availability_completion') + '</option>' +
             '<option value="0">' + M.util.get_string('option_incomplete', 'availability_completion') + '</option>' +
             '<option value="2">' + M.util.get_string('option_pass', 'availability_completion') + '</option>' +
             '<option value="3">' + M.util.get_string('option_fail', 'availability_completion') + '</option>' +
             '</select></label></span>';
-    var node = Y.Node.create('<span class="form-inline">' + html + '</span>');
+    var node = Y.Node.create('<span>' + html + '</span>');
 
     // Set initial values.
     if (json.cm !== undefined &&
@@ -56,7 +54,7 @@ M.availability_completion.form.getNode = function(json) {
     // Add event handlers (first time only).
     if (!M.availability_completion.form.addedEvents) {
         M.availability_completion.form.addedEvents = true;
-        var root = Y.one('.availability-field');
+        var root = Y.one('#fitem_id_availabilityconditionsjson');
         root.delegate('change', function() {
             // Whichever dropdown changed, just update the form.
             M.core_availability.form.update();

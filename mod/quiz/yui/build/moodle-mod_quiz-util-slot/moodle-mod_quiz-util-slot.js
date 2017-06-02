@@ -17,26 +17,26 @@ Y.namespace('Moodle.mod_quiz.util.slot');
  */
 Y.Moodle.mod_quiz.util.slot = {
     CSS: {
-        SLOT: 'slot',
-        QUESTIONTYPEDESCRIPTION: 'qtype_description',
+        SLOT : 'slot',
+        QUESTIONTYPEDESCRIPTION : 'qtype_description',
         CANNOT_DEPEND: 'question_dependency_cannot_depend'
     },
     CONSTANTS: {
-        SLOTIDPREFIX: 'slot-',
-        QUESTION: M.util.get_string('question', 'moodle')
+        SLOTIDPREFIX : 'slot-',
+        QUESTION : M.util.get_string('question', 'moodle')
     },
     SELECTORS: {
         SLOT: 'li.slot',
         INSTANCENAME: '.instancename',
         NUMBER: 'span.slotnumber',
-        PAGECONTENT: 'div#page-content',
-        PAGEBREAK: 'span.page_split_join_wrapper',
-        ICON: '.icon',
-        QUESTIONTYPEDESCRIPTION: '.qtype_description',
-        SECTIONUL: 'ul.section',
-        DEPENDENCY_WRAPPER: '.question_dependency_wrapper',
-        DEPENDENCY_LINK: '.question_dependency_wrapper .cm-edit-action',
-        DEPENDENCY_ICON: '.question_dependency_wrapper .icon'
+        PAGECONTENT : 'div#page-content',
+        PAGEBREAK : 'span.page_split_join_wrapper',
+        ICON : 'img.smallicon',
+        QUESTIONTYPEDESCRIPTION : '.qtype_description',
+        SECTIONUL : 'ul.section',
+        DEPENDENCY_WRAPPER : '.question_dependency_wrapper',
+        DEPENDENCY_LINK : '.question_dependency_wrapper .cm-edit-action',
+        DEPENDENCY_ICON : '.question_dependency_wrapper img'
     },
 
     /**
@@ -307,8 +307,7 @@ Y.Moodle.mod_quiz.util.slot = {
      */
     reorderPageBreaks: function() {
         // Get list of slot nodes.
-        var slots = this.getSlots();
-        var slotnumber = 0;
+        var slots = this.getSlots(), slotnumber = 0;
         // Loop through slots incrementing the number each time.
         slots.each(function(slot, key) {
             slotnumber++;
@@ -333,8 +332,7 @@ Y.Moodle.mod_quiz.util.slot = {
             var pagebreaklink = pagebreak.get('childNodes').item(0);
 
             // Get the correct title.
-            var action = '';
-            var iconname = '';
+            var action = '', iconname = '';
             if (Y.Moodle.mod_quiz.util.page.isPage(nextitem)) {
                 action = 'removepagebreak';
                 iconname = 'e/remove_page_break';
@@ -383,7 +381,7 @@ Y.Moodle.mod_quiz.util.slot = {
             slotnumber = 0,
             previousslot = null;
         // Loop through slots incrementing the number each time.
-        slots.each(function(slot) {
+        slots.each (function(slot) {
             slotnumber++;
 
             if (slotnumber == 1 || previousslot.getData('canfinish') === '0') {
@@ -420,23 +418,13 @@ Y.Moodle.mod_quiz.util.slot = {
         if (requiresprevious) {
             link.set('title', M.util.get_string('questiondependencyremove', 'quiz', a));
             link.setData('action', 'removedependency');
-            window.require(['core/templates'], function(Templates) {
-                Templates.renderPix('t/locked', 'core', M.util.get_string('questiondependsonprevious', 'quiz')).then(
-                    function(html) {
-                        icon.replace(html);
-                    }
-                );
-            });
+            icon.set('alt', M.util.get_string('questiondependsonprevious', 'quiz'));
+            icon.set('src', M.util.image_url('t/locked', 'moodle'));
         } else {
             link.set('title', M.util.get_string('questiondependencyadd', 'quiz', a));
             link.setData('action', 'adddependency');
-            window.require(['core/templates'], function(Templates) {
-                Templates.renderPix('t/unlocked', 'core', M.util.get_string('questiondependencyfree', 'quiz')).then(
-                    function(html) {
-                        icon.replace(html);
-                    }
-                );
-            });
+            icon.set('alt', M.util.get_string('questiondependencyfree', 'quiz'));
+            icon.set('src', M.util.image_url('t/unlocked', 'moodle'));
         }
     }
 };

@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 use renderer_base;
 use moodle_url;
 use core_competency\external\competency_exporter;
-use core_competency\external\performance_helper;
 
 /**
  * Class for exporting a course competency statistics summary.
@@ -35,7 +34,7 @@ use core_competency\external\performance_helper;
  * @copyright  2015 Damyon Wiese
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class course_competency_statistics_exporter extends \core\external\exporter {
+class course_competency_statistics_exporter extends \core_competency\external\exporter {
 
     public static function define_properties() {
         return array(
@@ -85,9 +84,12 @@ class course_competency_statistics_exporter extends \core\external\exporter {
             $proficientcompetencypercentageformatted = format_float($proficientcompetencypercentage);
         }
         $competencies = array();
-        $helper = new performance_helper();
+        $contextcache = array();
         foreach ($this->data->leastproficientcompetencies as $competency) {
-            $context = $helper->get_context_from_competency($competency);
+            if (!isset($contextcache[$competency->get_competencyframeworkid()])) {
+                $contextcache[$competency->get_competencyframeworkid()] = $competency->get_context();
+            }
+            $context = $contextcache[$competency->get_competencyframeworkid()];
             $exporter = new competency_exporter($competency, array('context' => $context));
             $competencies[] = $exporter->export($output);
         }

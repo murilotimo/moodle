@@ -16,8 +16,7 @@
 //
 // SCORM 1.2 API Implementation
 //
-function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebugging, scormauto, scormid, cfgwwwroot, sesskey,
-        scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride, hidetoc) {
+function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebugging, scormauto, scormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride) {
 
     var prerequrl = cfgwwwroot + "/mod/scorm/prereqs.php?a=" + scormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
     var datamodelurl = cfgwwwroot + "/mod/scorm/datamodel.php";
@@ -148,7 +147,7 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
 
         for (element in datamodel[scoid]) {
             if (element.match(/\.n\./) == null) {
-                if (typeof datamodel[scoid][element].defaultvalue != 'undefined') {
+                if ((typeof eval('datamodel["' + scoid + '"]["' + element + '"].defaultvalue')) != 'undefined') {
                     eval(element + ' = datamodel["' + scoid + '"]["' + element + '"].defaultvalue;');
                 } else {
                     eval(element + ' = "";');
@@ -170,7 +169,7 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
     var Initialized = false;
 
     function LMSInitialize (param) {
-        scoid = (scorm_current_node && scorm_current_node.scoid) ?  scorm_current_node.scoid : scoid;
+        scoid = scorm_current_node ? scorm_current_node.scoid : scoid;
         initdatamodel(scoid);
 
         errorCode = "0";
@@ -245,8 +244,8 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
             if (element != "") {
                 expression = new RegExp(CMIIndex,'g');
                 elementmodel = String(element).replace(expression,'.n.');
-                if (typeof datamodel[scoid][elementmodel] != "undefined") {
-                    if (datamodel[scoid][elementmodel].mod != 'w') {
+                if ((typeof eval('datamodel["' + scoid + '"]["' + elementmodel + '"]')) != "undefined") {
+                    if (eval('datamodel["' + scoid + '"]["' + elementmodel + '"].mod') != 'w') {
                         element = String(element).replace(expression, "_$1.");
                         elementIndexes = element.split('.');
                         subelement = 'cmi';
@@ -264,21 +263,21 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
                             errorCode = "0"; // Need to check if it is the right errorCode
                         }
                     } else {
-                        errorCode = datamodel[scoid][elementmodel].readerror;
+                        errorCode = eval('datamodel["' + scoid + '"]["' + elementmodel + '"].readerror');
                     }
                 } else {
                     childrenstr = '._children';
                     countstr = '._count';
                     if (elementmodel.substr(elementmodel.length - childrenstr.length,elementmodel.length) == childrenstr) {
                         parentmodel = elementmodel.substr(0,elementmodel.length - childrenstr.length);
-                        if (typeof datamodel[scoid][parentmodel] != "undefined") {
+                        if ((typeof eval('datamodel["' + scoid + '"]["' + parentmodel + '"]')) != "undefined") {
                             errorCode = "202";
                         } else {
                             errorCode = "201";
                         }
                     } else if (elementmodel.substr(elementmodel.length - countstr.length,elementmodel.length) == countstr) {
                         parentmodel = elementmodel.substr(0,elementmodel.length - countstr.length);
-                        if (typeof datamodel[scoid][parentmodel] != "undefined") {
+                        if ((typeof eval('datamodel["' + scoid + '"]["' + parentmodel + '"]')) != "undefined") {
                             errorCode = "203";
                         } else {
                             errorCode = "201";
@@ -305,9 +304,9 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
             if (element != "") {
                 expression = new RegExp(CMIIndex,'g');
                 elementmodel = String(element).replace(expression,'.n.');
-                if (typeof datamodel[scoid][elementmodel] != "undefined") {
-                    if (datamodel[scoid][elementmodel].mod != 'r') {
-                        expression = new RegExp(datamodel[scoid][elementmodel].format);
+                if ((typeof eval('datamodel["' + scoid + '"]["' + elementmodel + '"]')) != "undefined") {
+                    if (eval('datamodel["' + scoid + '"]["' + elementmodel + '"].mod') != 'r') {
+                        expression = new RegExp(eval('datamodel["' + scoid + '"]["' + elementmodel + '"].format'));
                         value = value + '';
                         matches = value.match(expression);
                         if (matches != null) {
@@ -357,8 +356,8 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
                                 if (autocommit && !(SCORMapi1_2.timeout)) {
                                     SCORMapi1_2.timeout = Y.later(60000, API, 'LMSCommit', [""], false);
                                 }
-                                if (typeof datamodel[scoid][elementmodel].range != "undefined") {
-                                    range = datamodel[scoid][elementmodel].range;
+                                if ((typeof eval('datamodel["' + scoid + '"]["' + elementmodel + '"].range')) != "undefined") {
+                                    range = eval('datamodel["' + scoid + '"]["' + elementmodel + '"].range');
                                     ranges = range.split('#');
                                     value = value * 1.0;
                                     if ((value >= ranges[0]) && (value <= ranges[1])) {
@@ -369,7 +368,7 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
                                         }
                                         return "true";
                                     } else {
-                                        errorCode = datamodel[scoid][elementmodel].writeerror;
+                                        errorCode = eval('datamodel["' + scoid + '"]["' + elementmodel + '"].writeerror');
                                     }
                                 } else {
                                     if (element == 'cmi.comments') {
@@ -385,10 +384,10 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
                                 }
                             }
                         } else {
-                            errorCode = datamodel[scoid][elementmodel].writeerror;
+                            errorCode = eval('datamodel["' + scoid + '"]["' + elementmodel + '"].writeerror');
                         }
                     } else {
-                        errorCode = datamodel[scoid][elementmodel].writeerror;
+                        errorCode = eval('datamodel["' + scoid + '"]["' + elementmodel + '"].writeerror');
                     }
                 } else {
                     errorCode = "201"
@@ -414,17 +413,12 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
         if (param == "") {
             if (Initialized) {
                 result = StoreData(cmi,false);
-                // Trigger TOC update only if TOC is displayed.
-                // Checks against setting Display course structure in player:
-                // 0 = To the side, 1 = Hidden, 2 = In a drop down menu, 3 = Disabled
-                if (hidetoc !== '3') {
-                    Y.log('Refreshing toc');
-                    var callback = M.mod_scorm.connectPrereqCallback;
-                    YUI().use('io-base', function(Y) {
-                        Y.on('io:complete', callback.success, Y);
-                        Y.io(prerequrl);
-                    });
-                }
+                // trigger TOC update
+                var callback = M.mod_scorm.connectPrereqCallback;
+                YUI().use('io-base', function(Y) {
+                    Y.on('io:complete', callback.success, Y);
+                    Y.io(prerequrl);
+                });
                 if (scormdebugging) {
                     LogAPICall("Commit", param, "", 0);
                 }
@@ -563,39 +557,40 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
 
                     // check if this specific element is not defined in the datamodel,
                     // but the generic element name is
-                    if (typeof datamodel[scoid][element] == "undefined" && typeof datamodel[scoid][elementmodel] != "undefined") {
+                    if ((eval('typeof datamodel["' + scoid + '"]["' + element + '"]')) == "undefined"
+                        && (eval('typeof datamodel["' + scoid + '"]["' + elementmodel + '"]')) != "undefined") {
 
                         // add this specific element to the data model (by cloning
                         // the generic element) so we can track changes to it
-                        datamodel[scoid][element] = CloneObj(datamodel[scoid][elementmodel]);
+                        eval('datamodel["' + scoid + '"]["' + element + '"]=CloneObj(datamodel["' + scoid + '"]["' + elementmodel + '"]);');
                     }
 
                     // check if the current element exists in the datamodel
-                    if (typeof datamodel[scoid][element] != "undefined") {
+                    if ((typeof eval('datamodel["' + scoid + '"]["' + element + '"]')) != "undefined") {
 
                         // make sure this is not a read only element
-                        if (datamodel[scoid][element].mod != 'r') {
+                        if (eval('datamodel["' + scoid + '"]["' + element + '"].mod') != 'r') {
 
                             elementstring = '&' + underscore(element) + '=' + encodeURIComponent(data[property]);
 
                             // check if the element has a default value
-                            if (typeof datamodel[scoid][element].defaultvalue != "undefined") {
+                            if ((typeof eval('datamodel["' + scoid + '"]["' + element + '"].defaultvalue')) != "undefined") {
 
                                 // check if the default value is different from the current value
-                                if (datamodel[scoid][element].defaultvalue != data[property] ||
-                                    typeof datamodel[scoid][element].defaultvalue != typeof data[property]) {
+                                if (eval('datamodel["' + scoid + '"]["' + element + '"].defaultvalue') != data[property]
+                                    || eval('typeof(datamodel["' + scoid + '"]["' + element + '"].defaultvalue)') != typeof(data[property])) {
 
                                     // append the URI fragment to the string we plan to commit
                                     datastring += elementstring;
 
                                     // update the element default to reflect the current committed value
-                                    datamodel[scoid][element].defaultvalue = data[property];
+                                    eval('datamodel["' + scoid + '"]["' + element + '"].defaultvalue=data[property];');
                                 }
                             } else {
                                 // append the URI fragment to the string we plan to commit
                                 datastring += elementstring;
                                 // no default value for the element, so set it now
-                                datamodel[scoid][element].defaultvalue = data[property];
+                                eval('datamodel["' + scoid + '"]["' + element + '"].defaultvalue=data[property];');
                             }
                         }
                     }
@@ -665,8 +660,6 @@ function SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebu
 
 M.scorm_api = {};
 
-M.scorm_api.init = function(Y, def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebugging, scormauto, scormid, cfgwwwroot,
-        sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride, hidetoc) {
-    window.API = new SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebugging, scormauto, scormid, cfgwwwroot,
-            sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride, hidetoc);
+M.scorm_api.init = function(Y, def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebugging, scormauto, scormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride) {
+    window.API = new SCORMapi1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, scormdebugging, scormauto, scormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride);
 }

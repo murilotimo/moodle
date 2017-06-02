@@ -26,3 +26,4 @@ Feature: List the system steps definitions
     Given I set the field "Contains" to "homepage"
     When I press "Filter"
     Then I should see "Opens Moodle homepage."
+

@@ -22,17 +22,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace tool_lp\external;
-defined('MOODLE_INTERNAL') || die();
 
 use context_user;
 use renderer_base;
 use stdClass;
-use core_comment\external\comment_area_exporter;
+use core_competency\external\comment_area_exporter;
 use core_competency\external\evidence_exporter;
 use core_competency\external\user_competency_exporter;
 use core_competency\external\user_competency_plan_exporter;
 use core_competency\external\user_competency_course_exporter;
-use core_user\external\user_summary_exporter;
+use core_competency\external\user_summary_exporter;
 use core_competency\user_competency;
 
 /**
@@ -41,7 +40,7 @@ use core_competency\user_competency;
  * @copyright  2015 Damyon Wiese
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class user_competency_summary_exporter extends \core\external\exporter {
+class user_competency_summary_exporter extends \core_competency\external\exporter {
 
     protected static function define_related() {
         // We cache the context so it does not need to be retrieved from the framework every time.
@@ -133,9 +132,9 @@ class user_competency_summary_exporter extends \core\external\exporter {
         $result->evidence = array();
         if (count($this->related['evidence'])) {
             foreach ($this->related['evidence'] as $evidence) {
-                $actionuserid = $evidence->get('actionuserid');
+                $actionuserid = $evidence->get_actionuserid();
                 if (!empty($actionuserid)) {
-                    $usercache[$evidence->get('actionuserid')] = true;
+                    $usercache[$evidence->get_actionuserid()] = true;
                 }
             }
             $users = array();
@@ -149,12 +148,11 @@ class user_competency_summary_exporter extends \core\external\exporter {
             }
 
             foreach ($this->related['evidence'] as $evidence) {
-                $actionuserid = $evidence->get('actionuserid');
+                $actionuserid = $evidence->get_actionuserid();
                 $related = array(
                     'scale' => $scale,
                     'usercompetency' => ($this->related['usercompetency'] ? $this->related['usercompetency'] : null),
                     'usercompetencyplan' => ($this->related['usercompetencyplan'] ? $this->related['usercompetencyplan'] : null),
-                    'context' => $evidence->get_context()
                 );
                 $related['actionuser'] = !empty($actionuserid) ? $usercache[$actionuserid] : null;
                 $exporter = new evidence_exporter($evidence, $related);

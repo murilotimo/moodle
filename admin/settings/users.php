@@ -190,10 +190,7 @@ if ($hassiteconfig
                     'department'  => new lang_string('department'),
                     'institution' => new lang_string('institution'),
                 )));
-        $setting = new admin_setting_configtext('fullnamedisplay', new lang_string('fullnamedisplay', 'admin'),
-            new lang_string('configfullnamedisplay', 'admin'), 'language', PARAM_TEXT, 50);
-        $setting->set_force_ltr(true);
-        $temp->add($setting);
+        $temp->add(new admin_setting_configtext('fullnamedisplay', new lang_string('fullnamedisplay', 'admin'), new lang_string('configfullnamedisplay', 'admin'), 'language', PARAM_TEXT, 50));
         $temp->add(new admin_setting_configtext('alternativefullnameformat', new lang_string('alternativefullnameformat', 'admin'),
                 new lang_string('alternativefullnameformat_desc', 'admin'),
                 'language', PARAM_RAW, 50));

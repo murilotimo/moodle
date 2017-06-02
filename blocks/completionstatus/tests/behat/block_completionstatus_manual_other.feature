@@ -21,7 +21,8 @@ Feature: Enable Block Completion in a course using manual completion by others
 
   Scenario: Add the block to a the course and mark a student complete.
     Given I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add the "Course completion status" block
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
@@ -30,13 +31,13 @@ Feature: Enable Block Completion in a course using manual completion by others
     And I press "Save changes"
     And I log out
     When I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I should see "Status: Not yet started" in the "Course completion status" "block"
     And I should see "No" in the "Teacher" "table_row"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I navigate to "Course completion" node in "Course administration > Reports"
+    And I follow "Course 1"
+    And I navigate to "Course completion" node in "Reports"
     And I follow "Click to mark user complete"
     # Running completion task just after clicking sometimes fail, as record
     # should be created before the task runs.
@@ -45,15 +46,17 @@ Feature: Enable Block Completion in a course using manual completion by others
     And I am on site homepage
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     Then I should see "Status: Complete" in the "Course completion status" "block"
     And I should see "Yes" in the "Teacher" "table_row"
     And I follow "More details"
     And I should see "Yes" in the "Marked complete by Teacher" "table_row"
 
+
   Scenario: Add the block to a the course and require multiple roles to mark a student complete.
     Given I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add the "Course completion status" block
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
@@ -64,18 +67,18 @@ Feature: Enable Block Completion in a course using manual completion by others
     And I press "Save changes"
     And I log out
     When I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I should see "Status: Not yet started" in the "Course completion status" "block"
     And I should see "No" in the "Teacher" "table_row"
     And I should see "No" in the "Non-editing teacher" "table_row"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I navigate to "Course completion" node in "Course administration > Reports"
+    And I follow "Course 1"
+    And I navigate to "Course completion" node in "Reports"
     And I follow "Click to mark user complete"
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I should see "Status: In progress" in the "Course completion status" "block"
     And I should see "Yes" in the "Teacher" "table_row"
     And I should see "No" in the "Non-editing teacher" "table_row"
@@ -84,8 +87,8 @@ Feature: Enable Block Completion in a course using manual completion by others
     And I should see "No" in the "Marked complete by Non-editing teacher" "table_row"
     And I log out
     And I log in as "teacher2"
-    And I am on "Course 1" course homepage
-    And I navigate to "Course completion" node in "Course administration > Reports"
+    And I follow "Course 1"
+    And I navigate to "Course completion" node in "Reports"
     And I follow "Click to mark user complete"
     # Running completion task just after clicking sometimes fail, as record
     # should be created before the task runs.
@@ -94,7 +97,7 @@ Feature: Enable Block Completion in a course using manual completion by others
     And I am on site homepage
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     Then I should see "Status: Complete" in the "Course completion status" "block"
     And I should see "Yes" in the "Teacher" "table_row"
     And I should see "Yes" in the "Non-editing teacher" "table_row"

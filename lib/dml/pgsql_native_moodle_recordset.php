@@ -38,21 +38,18 @@ class pgsql_native_moodle_recordset extends moodle_recordset {
     protected $result;
     /** @var current row as array.*/
     protected $current;
+    protected $bytea_oid;
     protected $blobs = array();
 
-    /**
-     * Build a new recordset to iterate over.
-     *
-     * @param resource $result A pg_query() result object to create a recordset from.
-     */
-    public function __construct($result) {
-        $this->result = $result;
+    public function __construct($result, $bytea_oid) {
+        $this->result    = $result;
+        $this->bytea_oid = $bytea_oid;
 
-        // Find out if there are any blobs.
-        $numfields = pg_num_fields($result);
-        for ($i = 0; $i < $numfields; $i++) {
-            $type = pg_field_type($result, $i);
-            if ($type == 'bytea') {
+        // find out if there are any blobs
+        $numrows = pg_num_fields($result);
+        for($i=0; $i<$numrows; $i++) {
+            $type_oid = pg_field_type_oid($result, $i);
+            if ($type_oid == $this->bytea_oid) {
                 $this->blobs[] = pg_field_name($result, $i);
             }
         }

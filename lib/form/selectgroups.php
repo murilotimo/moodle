@@ -26,7 +26,6 @@
  */
 
 require_once('HTML/QuickForm/element.php');
-require_once('templatable_form_element.php');
 
 /**
  * select type form element
@@ -38,11 +37,7 @@ require_once('templatable_form_element.php');
  * @copyright 2007 Jamie Pratt <me@jamiep.org>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class MoodleQuickForm_selectgroups extends HTML_QuickForm_element implements templatable {
-
-    use templatable_form_element {
-        export_for_template as export_for_template_base;
-    }
+class MoodleQuickForm_selectgroups extends HTML_QuickForm_element {
 
     /** @var bool add choose option */
     var $showchoose = false;
@@ -514,54 +509,5 @@ class MoodleQuickForm_selectgroups extends HTML_QuickForm_element implements tem
         } else {
             return 'default';
         }
-    }
-
-    public function export_for_template(renderer_base $output) {
-        $context = $this->export_for_template_base($output);
-        $optiongroups = [];
-        if ($this->showchoose) {
-            $optionsgroups[] = [
-                'text' => get_string('choosedots')
-            ];
-        }
-
-        // Standard option attributes.
-        $standardoptionattributes = ['text', 'value', 'selected', 'disabled'];
-        foreach ($this->_optGroups as $group) {
-            $options = [];
-
-            if (empty($group['options'])) {
-                continue;
-            }
-            foreach ($group['options'] as $option) {
-                $o = ['value' => (string)$option['attr']['value']];
-                if (is_array($this->_values) && in_array($o['value'], $this->_values)) {
-                    $o['selected'] = true;
-                } else {
-                    $o['selected'] = false;
-                }
-                $o['text'] = $option['text'];
-                $o['disabled'] = !empty($option['attr']['disabled']);
-                // Set other attributes.
-                $otheroptionattributes = [];
-                foreach ($option['attr'] as $attr => $value) {
-                    if (!in_array($attr, $standardoptionattributes) && $attr != 'class' && !is_object($value)) {
-                        $otheroptionattributes[] = $attr . '="' . s($value) . '"';
-                    }
-                }
-                $o['optionattributes'] = implode(' ', $otheroptionattributes);
-                $options[] = $o;
-            }
-
-            $og = [
-                'text' => $group['attr']['label'],
-                'options' => $options
-            ];
-
-            $optiongroups[] = $og;
-        }
-        $context['optiongroups'] = $optiongroups;
-
-        return $context;
     }
 }

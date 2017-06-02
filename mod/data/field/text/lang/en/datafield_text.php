@@ -25,4 +25,3 @@
  */
 
 $string['pluginname'] = 'Text input';
-$string['fieldtypelabel'] = 'Text field';

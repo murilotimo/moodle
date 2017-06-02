@@ -17,7 +17,7 @@ Y.namespace('Moodle.mod_quiz.util.page');
  */
 Y.Moodle.mod_quiz.util.page = {
     CSS: {
-        PAGE: 'page'
+        PAGE : 'page'
     },
     CONSTANTS: {
         ACTIONMENUIDPREFIX: 'action-menu-',
@@ -28,9 +28,8 @@ Y.Moodle.mod_quiz.util.page = {
     },
     SELECTORS: {
         ACTIONMENU: 'div.moodle-actionmenu',
-        ACTIONMENUBAR: '.menubar',
-        ACTIONMENUMENU: '.menu',
-        ADDASECTION: '[data-action="addasection"]',
+        ACTIONMENUBAR: 'ul.menubar',
+        ACTIONMENUMENU: 'ul.menu',
         PAGE: 'li.page',
         INSTANCENAME: '.instancename',
         NUMBER: 'h4'
@@ -207,9 +206,7 @@ Y.Moodle.mod_quiz.util.page = {
         beforenode.insert(page, 'after');
 
         // Enhance the add menu to make if fully visible and clickable.
-        if (typeof M.core.actionmenu !== "undefined") {
-            M.core.actionmenu.newDOMNode(page);
-        }
+        M.core.actionmenu.newDOMNode(page);
         return page;
     },
 
@@ -237,8 +234,7 @@ Y.Moodle.mod_quiz.util.page = {
      */
     reorderPages: function() {
         // Get list of page nodes.
-        var pages = this.getPages();
-        var currentpagenumber = 0;
+        var pages = this.getPages(), currentpagenumber = 0;
         // Loop through pages incrementing the number each time.
         pages.each(function(page) {
             // Is the page empty?
@@ -288,8 +284,8 @@ Y.Moodle.mod_quiz.util.page = {
             menumenu.set('id', this.CONSTANTS.ACTIONMENUIDPREFIX + id + this.CONSTANTS.ACTIONMENUMENUIDSUFFIX);
 
             // Update the URL of the add-section action.
-            menumenu.one(this.SELECTORS.ADDASECTION).set('href',
-                menumenu.one(this.SELECTORS.ADDASECTION).get('href').replace(/\baddsectionatpage=\d+\b/, 'addsectionatpage=' + id));
+            menumenu.one('a.addasection').set('href',
+                    menumenu.one('a.addasection').get('href').replace(/\baddsectionatpage=\d/, 'addsectionatpage=' + id));
 
         }, this);
     },

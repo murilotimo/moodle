@@ -36,7 +36,7 @@ class repository_dropbox extends repository {
     /**
      * @var dropbox     The instance of dropbox client.
      */
-    private $dropbox;
+    protected $dropbox;
 
     /**
      * @var int         The maximum file size to cache in the moodle filepool.
@@ -44,11 +44,24 @@ class repository_dropbox extends repository {
     public $cachelimit = null;
 
     /**
+     * @var repository  The actual repository.
+     */
+    protected $legacy;
+
+    /**
      * Constructor of dropbox plugin.
      *
      * @inheritDocs
      */
     public function __construct($repositoryid, $context = SYSCONTEXTID, $options = []) {
+        if (self::use_legacy_api()) {
+            $this->legacy = new repository_dropbox_legacy($repositoryid, $context, $options);
+
+            parent::__construct($repositoryid, $context, $options);
+
+            return;
+        }
+
         $options['page'] = optional_param('p', 1, PARAM_INT);
         parent::__construct($repositoryid, $context, $options);
 
@@ -69,11 +82,25 @@ class repository_dropbox extends repository {
     }
 
     /**
+     * Determine whether to use the legacy (v1) API.
+     *
+     * @return  bool
+     */
+    protected static function use_legacy_api() {
+        $uselegacyapi = get_config('dropbox', 'legacyapi');
+        return !empty($uselegacyapi);
+    }
+
+    /**
      * Repository method to serve the referenced file.
      *
      * @inheritDocs
      */
     public function send_file($storedfile, $lifetime=null , $filter=0, $forcedownload=false, array $options = null) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->send_file($storedfile, $lifetime, $filter, $forcedownload, $options);
+        }
+
         $reference = $this->unpack_reference($storedfile->get_reference());
 
         $maxcachesize = $this->max_cache_bytes();
@@ -115,6 +142,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function get_reference_details($reference, $filestatus = 0) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->get_reference_details($reference, $filestatus);
+        }
+
         global $USER;
         $ref  = unserialize($reference);
         $detailsprefix = $this->get_name();
@@ -145,6 +176,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function cache_file_by_reference($reference, $storedfile) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->cache_file_by_reference($reference, $storedfile);
+        }
+
         try {
             $this->import_external_file_contents($storedfile, $this->max_cache_bytes());
         } catch (Exception $e) {
@@ -167,6 +202,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function get_file_source_info($source) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->get_file_source_info($source);
+        }
+
         global $USER;
         return 'Dropbox ('.fullname($USER).'): ' . $source;
     }
@@ -177,6 +216,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function get_file_reference($source) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->get_file_reference($source);
+        }
+
         global $USER;
         $reference = new stdClass;
         $reference->userid = $USER->id;
@@ -200,6 +243,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function get_link($reference) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->get_link($reference);
+        }
+
         $unpacked = $this->unpack_reference($reference);
 
         return $this->get_file_download_link($unpacked->url);
@@ -211,6 +258,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function get_file($reference, $saveas = '') {
+        if (self::use_legacy_api()) {
+            return $this->legacy->get_file($reference, $saveas);
+        }
+
         $unpacked = $this->unpack_reference($reference);
 
         // This is a shared link, and hopefully it is still active.
@@ -228,6 +279,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function supported_filetypes() {
+        if (self::use_legacy_api()) {
+            return $this->legacy->supported_filetypes();
+        }
+
         return '*';
     }
 
@@ -237,6 +292,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function supported_returntypes() {
+        if (self::use_legacy_api()) {
+            return $this->legacy->supported_returntypes();
+        }
+
         return FILE_INTERNAL | FILE_REFERENCE | FILE_EXTERNAL;
     }
 
@@ -246,6 +305,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function get_listing($path = '', $page = '1') {
+        if (self::use_legacy_api()) {
+            return $this->legacy->get_listing($path, $page);
+        }
+
         if (empty($path) || $path == '/') {
             $path = '';
         } else {
@@ -294,6 +357,10 @@ class repository_dropbox extends repository {
      * @return  array
      */
     public function search($query, $page = 0) {
+        if (self::use_legacy_api()) {
+            return parent::search($query, $page);
+        }
+
         $list = [
                 'list'      => [],
                 'manage'    => 'https://www.dropbox.com/home',
@@ -333,6 +400,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function send_thumbnail($source) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->send_thumbnail($source);
+        }
+
         $content = $this->dropbox->get_thumbnail($source);
 
         // Set 30 days lifetime for the image.
@@ -348,6 +419,10 @@ class repository_dropbox extends repository {
      * @return  string                  New serialized reference
      */
     protected function fix_old_style_reference($packed) {
+        if (self::use_legacy_api()) {
+            throw new \coding_exception(__FUNCTION__ . ' is a v2 API function only');
+        }
+
         $ref = unserialize($packed);
         $ref = $this->dropbox->get_file_share_info($ref->path);
         if (!$ref || empty($ref->url)) {
@@ -401,6 +476,10 @@ class repository_dropbox extends repository {
      * @return  object                  The unpacked reference
      */
     protected function unpack_reference($packed) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->fix_old_style_reference($packed);
+        }
+
         $reference = unserialize($packed);
         if (empty($reference->url)) {
             // The reference is missing some information. Attempt to update it.
@@ -430,6 +509,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function logout() {
+        if (self::use_legacy_api()) {
+            return $this->legacy->logout();
+        }
+
         $this->dropbox->logout();
 
         return $this->print_login();
@@ -441,6 +524,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function check_login() {
+        if (self::use_legacy_api()) {
+            return $this->legacy->check_login();
+        }
+
         return $this->dropbox->is_logged_in();
     }
 
@@ -450,6 +537,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function print_login() {
+        if (self::use_legacy_api()) {
+            return $this->legacy->print_login();
+        }
+
         $url = $this->dropbox->get_login_url();
         if ($this->options['ajax']) {
             $ret = array();
@@ -469,6 +560,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function callback() {
+        if (self::use_legacy_api()) {
+            return $this->legacy->callback();
+        }
+
         $this->dropbox->callback();
     }
 
@@ -482,6 +577,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function cron() {
+        if (self::use_legacy_api()) {
+            return $this->legacy->cron();
+        }
+
         $fs = get_file_storage();
         $files = $fs->get_external_files($this->id);
         $fetchedreferences = [];
@@ -525,10 +624,19 @@ class repository_dropbox extends repository {
         $mform->addRule('dropbox_secret', get_string('required'), 'required', null, 'client');
         $mform->setType('dropbox_secret', PARAM_RAW_TRIMMED);
         $mform->addElement('static', null, '', get_string('instruction', 'repository_dropbox'));
+
+        $mform->addElement('static', null,
+                get_string('oauth2title', 'repository_dropbox'),
+                get_string('legacyapihelpsupported', 'repository_dropbox'));
         $mform->addElement('static', null,
                 get_string('oauth2redirecturi', 'repository_dropbox'),
                 self::get_oauth2callbackurl()->out()
             );
+
+        // The Legacy API is still available so give the user the option of which version to use.
+        $mform->addElement('radio', 'legacyapi', get_string('usev2api', 'repository_dropbox'), null, false);
+        $mform->addElement('radio', 'legacyapi', get_string('uselegacyapi', 'repository_dropbox'), null, true);
+        $mform->setDefault('legacyapi', false);
 
         $mform->addElement('text', 'dropbox_cachelimit', get_string('cachelimit', 'repository_dropbox'), array('size' => '40'));
         $mform->addRule('dropbox_cachelimit', null, 'numeric', null, 'client');
@@ -558,6 +666,11 @@ class repository_dropbox extends repository {
             unset($options['dropbox_cachelimit']);
         }
 
+        if (!empty($options['legacyapi'])) {
+            set_config('legacyapi', $this->legacyapi, 'dropbox');
+            unset($options['legacyapi']);
+        }
+
         return parent::set_option($options);
     }
 
@@ -573,11 +686,14 @@ class repository_dropbox extends repository {
             return trim(get_config('dropbox', 'dropbox_secret'));
         } else if ($config === 'dropbox_cachelimit') {
             return $this->max_cache_bytes();
+        } elseif ($config === 'legacyapi') {
+            return trim(get_config('dropbox', 'legacyapi'));
         } else {
             $options = parent::get_option();
             $options['dropbox_key'] = trim(get_config('dropbox', 'dropbox_key'));
             $options['dropbox_secret'] = trim(get_config('dropbox', 'dropbox_secret'));
             $options['dropbox_cachelimit'] = $this->max_cache_bytes();
+            $options['legacyapi'] = trim(get_config('dropbox', 'legacyapi'));
         }
 
         return $options;
@@ -601,6 +717,7 @@ class repository_dropbox extends repository {
      */
     public static function get_type_option_names() {
         return [
+                'legacyapi',
                 'dropbox_key',
                 'dropbox_secret',
                 'pluginname',
@@ -637,6 +754,10 @@ class repository_dropbox extends repository {
      * @inheritDocs
      */
     public function sync_reference(stored_file $file) {
+        if (self::use_legacy_api()) {
+            return $this->legacy->sync_reference($file);
+        }
+
         global $CFG;
 
         if ($file->get_referencelastsync() + DAYSECS > time()) {
@@ -693,6 +814,10 @@ class repository_dropbox extends repository {
      * @return  array                   The manipulated entries for display in the file picker
      */
     protected function process_entries(array $entries) {
+        if (self::use_legacy_api()) {
+            throw new \coding_exception(__FUNCTION__ . ' is a v2 API function only');
+        }
+
         global $OUTPUT;
 
         $dirslist   = [];
@@ -710,7 +835,7 @@ class repository_dropbox extends repository {
                         // Use the display path here rather than lower.
                         // Dropbox is case insensitive but this leads to more accurate breadcrumbs.
                         'path'              => file_correct_filepath($entrydata->path_display),
-                        'thumbnail'         => $OUTPUT->image_url(file_folder_icon(64))->out(false),
+                        'thumbnail'         => $OUTPUT->pix_url(file_folder_icon(64))->out(false),
                         'thumbnail_height'  => 64,
                         'thumbnail_width'   => 64,
                         'children'          => array(),
@@ -722,7 +847,7 @@ class repository_dropbox extends repository {
                         'source'            => $entrydata->path_lower,
                         'size'              => $entrydata->size,
                         'date'              => strtotime($entrydata->client_modified),
-                        'thumbnail'         => $OUTPUT->image_url(file_extension_icon($entrydata->path_lower, 64))->out(false),
+                        'thumbnail'         => $OUTPUT->pix_url(file_extension_icon($entrydata->path_lower, 64))->out(false),
                         'realthumbnail'     => $this->get_thumbnail_url($entrydata),
                         'thumbnail_height'  => 64,
                         'thumbnail_width'   => 64,
@@ -742,6 +867,10 @@ class repository_dropbox extends repository {
      * @return  array
      */
     protected function process_breadcrumbs($path) {
+        if (self::use_legacy_api()) {
+            throw new \coding_exception(__FUNCTION__ . ' is a v2 API function only');
+        }
+
         // Process breadcrumb trail.
         // Note: Dropbox is case insensitive.
         // Without performing an additional API call, it isn't possible to get the path_display.
@@ -777,6 +906,10 @@ class repository_dropbox extends repository {
      * @return  moodle_url
      */
     protected function get_thumbnail_url($entry) {
+        if (self::use_legacy_api()) {
+            throw new \coding_exception(__FUNCTION__ . ' is a v2 API function only');
+        }
+
         if ($this->dropbox->supports_thumbnail($entry)) {
             $thumburl = new moodle_url('/repository/dropbox/thumbnail.php', [
                 // The id field in dropbox is unique - no need to specify a revision.

@@ -33,7 +33,7 @@ if (isguestuser()) {
     throw new require_login_exception('Guests are not allowed here.');
 }
 
-$ip   = optional_param('ip', getremoteaddr(), PARAM_RAW);
+$ip   = optional_param('ip', getremoteaddr(), PARAM_HOST);
 $user = optional_param('user', 0, PARAM_INT);
 
 if (isset($CFG->iplookup)) {
@@ -48,11 +48,15 @@ $PAGE->set_context(context_system::instance());
 $info = array($ip);
 $note = array();
 
-if (cleanremoteaddr($ip) === false) {
+if (!preg_match('/(^\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/', $ip, $match)) {
     print_error('invalidipformat', 'error');
 }
 
-if (!ip_is_public($ip)) {
+if ($match[1] > 255 or $match[2] > 255 or $match[3] > 255 or $match[4] > 255) {
+    print_error('invalidipformat', 'error');
+}
+
+if ($match[1] == '127' or $match[1] == '10' or ($match[1] == '172' and $match[2] >= '16' and $match[2] <= '31') or ($match[1] == '192' and $match[2] == '168')) {
     print_error('iplookupprivate', 'error');
 }
 

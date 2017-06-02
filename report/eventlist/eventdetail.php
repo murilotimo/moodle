@@ -49,7 +49,7 @@ if (!is_dir($directory)) {
 }
 $filename = end($component);
 $eventfiles = $directory . '/' . $filename . '.php';
-$title = $eventname::get_name_with_info();
+$title = $eventname::get_name();
 
 // Define event information.
 $eventinformation = array('title' => $title);

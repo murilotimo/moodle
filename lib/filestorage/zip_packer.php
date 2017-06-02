@@ -258,12 +258,10 @@ class zip_packer extends file_packer {
      * @param array $onlyfiles only extract files present in the array. The path to files MUST NOT
      *              start with a /. Example: array('myfile.txt', 'directory/anotherfile.txt')
      * @param file_progress $progress Progress indicator callback or null if not required
-     * @param bool $returnbool Whether to return a basic true/false indicating error state, or full per-file error
-     * details.
      * @return bool|array list of processed files; false if error
      */
     public function extract_to_pathname($archivefile, $pathname,
-            array $onlyfiles = null, file_progress $progress = null, $returnbool = false) {
+            array $onlyfiles = null, file_progress $progress = null) {
         global $CFG;
 
         if (!is_string($archivefile)) {
@@ -271,7 +269,6 @@ class zip_packer extends file_packer {
         }
 
         $processed = array();
-        $success = true;
 
         $pathname = rtrim($pathname, '/');
         if (!is_readable($archivefile)) {
@@ -311,7 +308,6 @@ class zip_packer extends file_packer {
                 // directory
                 if (is_file($newdir) and !unlink($newdir)) {
                     $processed[$name] = 'Can not create directory, file already exists'; // TODO: localise
-                    $success = false;
                     continue;
                 }
                 if (is_dir($newdir)) {
@@ -322,7 +318,6 @@ class zip_packer extends file_packer {
                         $processed[$name] = true;
                     } else {
                         $processed[$name] = 'Can not create directory'; // TODO: localise
-                        $success = false;
                     }
                 }
                 continue;
@@ -335,7 +330,6 @@ class zip_packer extends file_packer {
             if (!is_dir($newdir)) {
                 if (!mkdir($newdir, $CFG->directorypermissions, true)) {
                     $processed[$name] = 'Can not create directory'; // TODO: localise
-                    $success = false;
                     continue;
                 }
             }
@@ -343,12 +337,10 @@ class zip_packer extends file_packer {
             $newfile = "$newdir/$filename";
             if (!$fp = fopen($newfile, 'wb')) {
                 $processed[$name] = 'Can not write target file'; // TODO: localise
-                $success = false;
                 continue;
             }
             if (!$fz = $ziparch->get_stream($info->index)) {
                 $processed[$name] = 'Can not read file from zip archive'; // TODO: localise
-                $success = false;
                 fclose($fp);
                 continue;
             }
@@ -361,7 +353,6 @@ class zip_packer extends file_packer {
             fclose($fp);
             if (filesize($newfile) !== $size) {
                 $processed[$name] = 'Unknown error during zip extraction'; // TODO: localise
-                $success = false;
                 // something went wrong :-(
                 @unlink($newfile);
                 continue;
@@ -369,12 +360,7 @@ class zip_packer extends file_packer {
             $processed[$name] = true;
         }
         $ziparch->close();
-
-        if ($returnbool) {
-            return $success;
-        } else {
-            return $processed;
-        }
+        return $processed;
     }
 
     /**

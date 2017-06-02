@@ -7,9 +7,12 @@ Feature: Manage competency frameworks
   Background:
     Given I log in as "admin"
     And I am on site homepage
+    And I expand "Site administration" node
+    When I expand "Competencies" node
+    Then I should see "Competency frameworks"
 
   Scenario: Create a new framework
-    Given I navigate to "Competencies > Competency frameworks" in site administration
+    Given I follow "Competency frameworks"
     And I should see "List of competency frameworks"
     And I click on "Add new competency framework" "button"
     And I should see "General"
@@ -31,7 +34,7 @@ Feature: Manage competency frameworks
     Given the following lp "frameworks" exist:
       | shortname | idnumber |
       | Science Year-2 | sc-y-2 |
-    And I navigate to "Competencies > Competency frameworks" in site administration
+    And I follow "Competency frameworks"
     And I should see "Science Year-2"
     When I click on "Science Year-2" "link"
     Then I should see "Science Year-2"
@@ -40,7 +43,7 @@ Feature: Manage competency frameworks
     Given the following lp "frameworks" exist:
       | shortname | idnumber |
       | Science Year-3 | sc-y-3 |
-    And I navigate to "Competencies > Competency frameworks" in site administration
+    And I follow "Competency frameworks"
     And I should see "Science Year-3"
     And I click on "Edit" of edit menu in the "Science Year-3" row
     And the field "Name" matches value "Science Year-3 "
@@ -54,7 +57,7 @@ Feature: Manage competency frameworks
     Given the following lp "frameworks" exist:
       | shortname | idnumber |
       | Science Year-4 | sc-y-4 |
-    And I navigate to "Competencies > Competency frameworks" in site administration
+    And I follow "Competency frameworks"
     And I should see "Science Year-4"
     And I should see "sc-y-4"
     And I click on "Delete" of edit menu in the "Science Year-4" row
@@ -68,7 +71,7 @@ Feature: Manage competency frameworks
     Then I should not see "Science Year-4"
     And I should not see "sc-y-4"
 
-  Scenario: Edit a framework with competencies in user competency
+Scenario: Edit a framework with competencies in user competency
     Given the following lp "frameworks" exist:
       | shortname | idnumber |
       | Science Year-5 | sc-y-5 |
@@ -87,7 +90,7 @@ Feature: Manage competency frameworks
       | user | competency |
       | admin | Comp1 |
       | admin | Comp2 |
-    And I navigate to "Competencies > Competency frameworks" in site administration
+    And I follow "Competency frameworks"
     And I should see "Science Year-5"
     And I click on "Edit" of edit menu in the "Science Year-5" row
     And the field "Name" matches value "Science Year-5 "
@@ -98,7 +101,7 @@ Feature: Manage competency frameworks
     And I should see "Science Year-5 Edited"
     And I should see "sc-y-5"
 
-  Scenario: Edit a framework with competencies in user competency plan
+Scenario: Edit a framework with competencies in user competency plan
     Given the following lp "frameworks" exist:
       | shortname | idnumber |
       | Science Year-6 | sc-y-6 |
@@ -117,7 +120,7 @@ Feature: Manage competency frameworks
       | user | competency | plan |
       | admin | Comp1 | Plan Science-6 |
       | admin | Comp2 | Plan Science-6 |
-    And I navigate to "Competencies > Competency frameworks" in site administration
+    And I follow "Competency frameworks"
     And I should see "Science Year-6"
     And I click on "Edit" of edit menu in the "Science Year-6" row
     And the field "Name" matches value "Science Year-6 "

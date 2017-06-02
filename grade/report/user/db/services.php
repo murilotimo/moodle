@@ -41,14 +41,5 @@ $functions = array(
         'type' => 'write',
         'capabilities' => 'gradereport/user:view',
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
-    ),
-    'gradereport_user_get_grade_items' => array(
-        'classname' => 'gradereport_user_external',
-        'methodname' => 'get_grade_items',
-        'classpath' => 'grade/report/user/externallib.php',
-        'description' => 'Returns the complete list of grade items for users in a course',
-        'type' => 'read',
-        'capabilities' => 'gradereport/user:view',
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     )
 );

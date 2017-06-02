@@ -160,8 +160,6 @@ class lesson_page_type_branchtable extends lesson_page {
     public function check_answer() {
         global $USER, $DB, $PAGE, $CFG;
 
-        $result = parent::check_answer();
-
         require_sesskey();
         $newpageid = optional_param('jumpto', null, PARAM_INT);
         // going to insert into lesson_branch
@@ -175,17 +173,6 @@ class lesson_page_type_branchtable extends lesson_page {
         } else {
             $retries = 0;
         }
-
-        // First record this page in lesson_branch. This record may be needed by lesson_unseen_branch_jump.
-        $branch = new stdClass;
-        $branch->lessonid = $this->lesson->id;
-        $branch->userid = $USER->id;
-        $branch->pageid = $this->properties->id;
-        $branch->retry = $retries;
-        $branch->flag = $branchflag;
-        $branch->timeseen = time();
-        $branch->nextpageid = 0;    // Next page id will be set later.
-        $branch->id = $DB->insert_record("lesson_branch", $branch);
 
         //  this is called when jumping to random from a branch table
         $context = context_module::instance($PAGE->cm->id);
@@ -212,14 +199,18 @@ class lesson_page_type_branchtable extends lesson_page {
             $newpageid = lesson_unseen_branch_jump($this->lesson, $USER->id);
         }
 
-        // Update record to set nextpageid.
+        // Record this page in lesson_branch.
+        $branch = new stdClass;
+        $branch->lessonid = $this->lesson->id;
+        $branch->userid = $USER->id;
+        $branch->pageid = $this->properties->id;
+        $branch->retry = $retries;
+        $branch->flag = $branchflag;
+        $branch->timeseen = time();
         $branch->nextpageid = $newpageid;
-        $DB->update_record("lesson_branch", $branch);
+        $DB->insert_record("lesson_branch", $branch);
 
-        // This will force to redirect to the newpageid.
-        $result->inmediatejump = true;
-        $result->newpageid = $newpageid;
-        return $result;
+        redirect(new moodle_url('/mod/lesson/view.php', array('id' => $PAGE->cm->id, 'pageid' => $newpageid)));
     }
 
     public function display_answers(html_table $table) {
@@ -260,9 +251,7 @@ class lesson_page_type_branchtable extends lesson_page {
         $formattextdefoptions->context = $answerpage->context;
 
         foreach ($answers as $answer) {
-            $data = "<input type=\"button\" class=\"btn btn-secondary\" name=\"$answer->id\" " .
-                    "value=\"".s(strip_tags(format_text($answer->answer, FORMAT_MOODLE, $formattextdefoptions)))."\" " .
-                    "disabled=\"disabled\"> ";
+            $data = "<input type=\"button\" name=\"$answer->id\" value=\"".s(strip_tags(format_text($answer->answer, FORMAT_MOODLE,$formattextdefoptions)))."\" disabled=\"disabled\"> ";
             $data .= get_string('jumpsto', 'lesson', $this->get_jump_name($answer->jumpto));
             $answerdata->answers[] = array($data, "");
             $answerpage->answerdata = $answerdata;

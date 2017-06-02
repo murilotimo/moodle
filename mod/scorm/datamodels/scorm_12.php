@@ -55,8 +55,7 @@ $scorm->autocommit = ($scorm->autocommit === "1") ? true : false;
 $scorm->masteryoverride = ($scorm->masteryoverride === "1") ? true : false;
 $PAGE->requires->js_init_call('M.scorm_api.init', array($def, $cmiobj, $cmiint, $cmistring256, $cmistring4096,
                                                         scorm_debugging($scorm), $scorm->auto, $scorm->id, $CFG->wwwroot,
-                                                        sesskey(), $scoid, $attempt, $mode, $id, $currentorg, $scorm->autocommit,
-                                                        $scorm->masteryoverride, $scorm->hidetoc));
+                                                        sesskey(), $scoid, $attempt, $mode, $id, $currentorg, $scorm->autocommit, $scorm->masteryoverride));
 
 // Pull in the debugging utilities.
 if (scorm_debugging($scorm)) {

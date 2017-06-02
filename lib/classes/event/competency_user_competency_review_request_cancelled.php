@@ -46,13 +46,13 @@ class competency_user_competency_review_request_cancelled extends base {
      * @return self
      */
     public static function create_from_user_competency(user_competency $usercompetency) {
-        if (!$usercompetency->get('id')) {
+        if (!$usercompetency->get_id()) {
             throw new \coding_exception('The user competency ID must be set.');
         }
         $params = array(
             'contextid' => $usercompetency->get_context()->id,
-            'objectid' => $usercompetency->get('id'),
-            'relateduserid' => $usercompetency->get('userid')
+            'objectid' => $usercompetency->get_id(),
+            'relateduserid' => $usercompetency->get_userid()
         );
 
         $event = static::create($params);

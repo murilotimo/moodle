@@ -32,7 +32,8 @@ Feature: Using the activity grade form element
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Forum type | Standard forum for general use |
@@ -42,20 +43,20 @@ Feature: Using the activity grade form element
       | scale[modgrade_point] | 100 |
       | Group mode | No groups |
     And I follow "Test forum name"
-    And I navigate to "Edit settings" in current page administration
+    And I click on "Edit settings" "link" in the "Administration" "block"
     When I expand all fieldsets
     Then I should not see "Some grades have already been awarded, so the grade type"
     And I set the field "scale[modgrade_type]" to "Scale"
     And I set the field "scale[modgrade_scale]" to "ABCDEF"
     And I press "Save and display"
     And I should not see "You cannot change the type, as grades already exist for this item"
-    And I navigate to "Edit settings" in current page administration
+    And I click on "Edit settings" "link" in the "Administration" "block"
     And I expand all fieldsets
     And I should not see "Some grades have already been awarded, so the grade type"
     And I set the field "scale[modgrade_scale]" to "Letter scale"
     And I press "Save and display"
     And I should not see "You cannot change the scale, as grades already exist for this item"
-    And I navigate to "Edit settings" in current page administration
+    And I click on "Edit settings" "link" in the "Administration" "block"
     And I expand all fieldsets
     And I should not see "Some grades have already been awarded, so the grade type"
     And I set the field "scale[modgrade_type]" to "Point"
@@ -79,7 +80,8 @@ Feature: Using the activity grade form element
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Forum type | Standard forum for general use |
@@ -90,7 +92,7 @@ Feature: Using the activity grade form element
       | Group mode | No groups |
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I follow "Test forum name"
     And I press "Add a new discussion topic"
     And I set the following fields to these values:
@@ -99,18 +101,17 @@ Feature: Using the activity grade form element
     And I press "Post to forum"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I follow "Test forum name"
     And I follow "Discussion subject"
     And I set the field "rating" to "D"
-    And I follow "Test forum name"
-    And I navigate to "Edit settings" in current page administration
+    And I click on "Edit settings" "link" in the "Administration" "block"
     When I expand all fieldsets
     Then I should see "Some grades have already been awarded, so the grade type and scale cannot be changed"
     # Try saving the form and visiting it back to verify that everything is working ok.
     And I press "Save and display"
     And I should not see "When selecting a ratings aggregate type you must also select"
-    And I navigate to "Edit settings" in current page administration
+    And I click on "Edit settings" "link"
     And I expand all fieldsets
     And the field "Aggregate type" matches value "Average of ratings"
     And the field "scale[modgrade_type]" matches value "Scale"
@@ -132,32 +133,34 @@ Feature: Using the activity grade form element
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | Test assignment name |
       | Description | Test assignment description |
       | grade[modgrade_type] | Scale |
       | grade[modgrade_scale] | ABCDEF |
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I follow "Test assignment name"
-    And I navigate to "View all submissions" in current page administration
+    And I follow "View all submissions"
     And I click on "Grade" "link" in the "Student 1" "table_row"
     And I set the field "Grade" to "C"
     And I press "Save changes"
     And I press "Ok"
-    And I follow "Edit settings"
+    And I click on "Edit settings" "link"
     When I expand all fieldsets
     Then I should see "Some grades have already been awarded, so the grade type and scale cannot be changed"
     # Try saving the form and visiting it back to verify everything is working ok.
     And I press "Save and display"
-    And I navigate to "Edit settings" in current page administration
+    And I click on "Edit settings" "link"
     And I expand all fieldsets
     And the field "grade[modgrade_type]" matches value "Scale"
     And the field "grade[modgrade_scale]" matches value "ABCDEF"
 
   Scenario: Attempting to change the maximum grade when ratings exist
     Given I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Forum type | Standard forum for general use |
@@ -168,7 +171,7 @@ Feature: Using the activity grade form element
       | Group mode | No groups |
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I follow "Test forum name"
     And I press "Add a new discussion topic"
     And I set the following fields to these values:
@@ -177,13 +180,12 @@ Feature: Using the activity grade form element
     And I press "Post to forum"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I follow "Test forum name"
     And I follow "Discussion subject"
     And I set the field "rating" to "100"
     And I press "Rate"
-    And I follow "Test forum name"
-    And I navigate to "Edit settings" in current page administration
+    And I click on "Edit settings" "link" in the "Administration" "block"
     When I expand all fieldsets
     Then I should see "Some grades have already been awarded, so the grade type cannot be changed. If you wish to change the maximum grade, you must first choose whether or not to rescale existing grades."
     And I set the field "Maximum grade" to "50"
@@ -193,17 +195,18 @@ Feature: Using the activity grade form element
   @javascript
   Scenario: Attempting to change the maximum grade when no rescaling option has been chosen
     Given I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | Test assignment name |
       | Description | Test assignment description |
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I follow "Test assignment name"
-    And I navigate to "View all submissions" in current page administration
+    And I follow "View all submissions"
     And I click on "Grade" "link" in the "Student 1" "table_row"
     And I set the field "Grade out of 100" to "50"
     And I press "Save changes"
     And I press "Ok"
-    And I follow "Edit settings"
+    And I click on "Edit settings" "link"
     When I expand all fieldsets
     Then I should see "Some grades have already been awarded, so the grade type cannot be changed. If you wish to change the maximum grade, you must first choose whether or not to rescale existing grades."

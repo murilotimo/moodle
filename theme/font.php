@@ -53,10 +53,6 @@ if (!$font) {
     font_not_found();
 }
 
-if ($to = strpos($font, '?')) {
-    $font = substr($font, 0, $to);
-}
-
 if (empty($component) or $component === 'moodle' or $component === 'core') {
     $component = 'core';
 }
@@ -110,8 +106,7 @@ if ($rev > 0) {
         if (!empty($_SERVER['HTTP_IF_NONE_MATCH']) || !empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
             // We do not actually need to verify the etag value because our files
             // never change in cache because we increment the rev parameter.
-            // 90 days only - based on Moodle point release cadence being every 3 months.
-            $lifetime = 60 * 60 * 24 * 90;
+            $lifetime = 60*60*24*60; // 60 days only - the revision may get incremented quite often.
             header('HTTP/1.1 304 Not Modified');
             header('Expires: '. gmdate('D, d M Y H:i:s', time() + $lifetime) .' GMT');
             header('Cache-Control: public, max-age='.$lifetime);
@@ -178,15 +173,14 @@ function send_cached_font($fontpath, $etag, $font, $mimetype) {
     global $CFG;
     require("$CFG->dirroot/lib/xsendfilelib.php");
 
-    // 90 days only - based on Moodle point release cadence being every 3 months.
-    $lifetime = 60 * 60 * 24 * 90;
+    $lifetime = 60*60*24*60; // 60 days only - the revision may get incremented quite often.
 
     header('Etag: "'.$etag.'"');
     header('Content-Disposition: inline; filename="'.$font.'"');
     header('Last-Modified: '. gmdate('D, d M Y H:i:s', filemtime($fontpath)) .' GMT');
     header('Expires: '. gmdate('D, d M Y H:i:s', time() + $lifetime) .' GMT');
     header('Pragma: ');
-    header('Cache-Control: public, max-age='.$lifetime.', immutable');
+    header('Cache-Control: public, max-age='.$lifetime);
     header('Accept-Ranges: none');
     header('Content-Type: '.$mimetype);
     header('Content-Length: '.filesize($fontpath));

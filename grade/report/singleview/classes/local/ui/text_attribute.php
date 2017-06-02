@@ -65,24 +65,38 @@ class text_attribute extends element {
      * @return string The HTML.
      */
     public function html() {
-        global $OUTPUT;
-
-        $context = (object) [
-            'id' => $this->name,
+        $attributes = array(
+            'type' => 'text',
             'name' => $this->name,
             'value' => $this->value,
-            'disabled' => $this->isdisabled,
-        ];
+            'id' => $this->name
+        );
 
-        $context->label = '';
-        if (preg_match("/^feedback/", $this->name)) {
-            $context->label = get_string('feedbackfor', 'gradereport_singleview', $this->label);
-            $context->tabindex = '2';
-        } else if (preg_match("/^finalgrade/", $this->name)) {
-            $context->label = get_string('gradefor', 'gradereport_singleview', $this->label);
-            $context->tabindex = '1';
+        if ($this->isdisabled) {
+            $attributes['disabled'] = 'DISABLED';
         }
 
-        return $OUTPUT->render_from_template('gradereport_singleview/text_attribute', $context);
+        $hidden = array(
+            'type' => 'hidden',
+            'name' => 'old' . $this->name,
+            'value' => $this->value
+        );
+
+        $label = '';
+        if (preg_match("/^feedback/", $this->name)) {
+            $labeltitle = get_string('feedbackfor', 'gradereport_singleview', $this->label);
+            $attributes['tabindex'] = '2';
+            $label = html_writer::tag('label', $labeltitle,  array('for' => $this->name, 'class' => 'accesshide'));
+        } else if (preg_match("/^finalgrade/", $this->name)) {
+            $labeltitle = get_string('gradefor', 'gradereport_singleview', $this->label);
+            $attributes['tabindex'] = '1';
+            $label = html_writer::tag('label', $labeltitle,  array('for' => $this->name, 'class' => 'accesshide'));
+        }
+
+        return (
+            $label .
+            html_writer::empty_tag('input', $attributes) .
+            html_writer::empty_tag('input', $hidden)
+        );
     }
 }

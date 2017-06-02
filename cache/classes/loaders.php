@@ -213,7 +213,7 @@ class cache implements cache_loader {
         $this->definition = $definition;
         $this->store = $store;
         $this->storetype = get_class($store);
-        $this->perfdebug = (!empty($CFG->perfdebug) and $CFG->perfdebug > 7);
+        $this->perfdebug = !empty($CFG->perfdebug);
         if ($loader instanceof cache_loader) {
             $this->loader = $loader;
             // Mark the loader as a sub (chained) loader.
@@ -272,65 +272,6 @@ class cache implements cache_loader {
                 $this->staticaccelerationkeys = array();
                 $this->staticaccelerationcount = 0;
             }
-        }
-    }
-
-    /**
-     * Process any outstanding invalidation events for the cache we are registering,
-     *
-     * Identifiers and event invalidation are not compatible with each other at this time.
-     * As a result the cache does not need to consider identifiers when working out what to invalidate.
-     */
-    protected function handle_invalidation_events() {
-        if (!$this->definition->has_invalidation_events()) {
-            return;
-        }
-
-        $lastinvalidation = $this->get('lastinvalidation');
-        if ($lastinvalidation === false) {
-            // This is a new cache or purged globally, there won't be anything to invalidate.
-            // Set the time of the last invalidation and move on.
-            $this->set('lastinvalidation', self::now());
-            return;
-        } else if ($lastinvalidation == self::now()) {
-            // We've already invalidated during this request.
-            return;
-        }
-
-        // Get the event invalidation cache.
-        $cache = self::make('core', 'eventinvalidation');
-        $events = $cache->get_many($this->definition->get_invalidation_events());
-        $todelete = array();
-        $purgeall = false;
-        // Iterate the returned data for the events.
-        foreach ($events as $event => $keys) {
-            if ($keys === false) {
-                // No data to be invalidated yet.
-                continue;
-            }
-            // Look at each key and check the timestamp.
-            foreach ($keys as $key => $timestamp) {
-                // If the timestamp of the event is more than or equal to the last invalidation (happened between the last
-                // invalidation and now)then we need to invaliate the key.
-                if ($timestamp >= $lastinvalidation) {
-                    if ($key === 'purged') {
-                        $purgeall = true;
-                        break;
-                    } else {
-                        $todelete[] = $key;
-                    }
-                }
-            }
-        }
-        if ($purgeall) {
-            $this->purge();
-        } else if (!empty($todelete)) {
-            $todelete = array_unique($todelete);
-            $this->delete_many($todelete);
-        }
-        // Set the time of the last invalidation.
-        if ($purgeall || !empty($todelete)) {
-            $this->set('lastinvalidation', self::now());
         }
     }
 
@@ -445,9 +386,6 @@ class cache implements cache_loader {
         $isusingpersist = $this->use_static_acceleration();
         foreach ($keys as $key) {
             $pkey = $this->parse_key($key);
-            if (is_array($pkey)) {
-                $pkey = $pkey['key'];
-            }
             $keysparsed[$key] = $pkey;
             $parsedkeys[$pkey] = $key;
             $keystofind[$pkey] = $key;
@@ -1007,12 +945,15 @@ class cache implements cache_loader {
     }
 
     /**
+     * Returns true if this cache is making use of the static acceleration array.
+     *
      * @deprecated since 2.6
      * @see cache::use_static_acceleration()
+     * @return bool
      */
     protected function is_using_persist_cache() {
-        throw new coding_exception('cache::is_using_persist_cache() can not be used anymore.' .
-            ' Please use cache::use_static_acceleration() instead.');
+        debugging('This function has been deprecated. Please call use_static_acceleration instead', DEBUG_DEVELOPER);
+        return $this->use_static_acceleration();
     }
 
     /**
@@ -1025,12 +966,16 @@ class cache implements cache_loader {
     }
 
     /**
+     * Returns true if the requested key exists within the static acceleration array.
+     *
      * @see cache::static_acceleration_has
      * @deprecated since 2.6
+     * @param string $key The parsed key
+     * @return bool
      */
-    protected function is_in_persist_cache() {
-        throw new coding_exception('cache::is_in_persist_cache() can not be used anymore.' .
-            ' Please use cache::static_acceleration_has() instead.');
+    protected function is_in_persist_cache($key) {
+        debugging('This function has been deprecated. Please call static_acceleration_has instead', DEBUG_DEVELOPER);
+        return $this->static_acceleration_has($key);
     }
 
     /**
@@ -1049,12 +994,16 @@ class cache implements cache_loader {
     }
 
     /**
+     * Returns the item from the static acceleration array if it exists there.
+     *
      * @deprecated since 2.6
      * @see cache::static_acceleration_get
+     * @param string $key The parsed key
+     * @return mixed|false The data from the static acceleration array or false if it wasn't there.
      */
-    protected function get_from_persist_cache() {
-        throw new coding_exception('cache::get_from_persist_cache() can not be used anymore.' .
-            ' Please use cache::static_acceleration_get() instead.');
+    protected function get_from_persist_cache($key) {
+        debugging('This function has been deprecated. Please call static_acceleration_get instead', DEBUG_DEVELOPER);
+        return $this->static_acceleration_get($key);
     }
 
     /**
@@ -1100,12 +1049,17 @@ class cache implements cache_loader {
     }
 
     /**
+     * Sets a key value pair into the static acceleration array.
+     *
      * @deprecated since 2.6
      * @see cache::static_acceleration_set
+     * @param string $key The parsed key
+     * @param mixed $data
+     * @return bool
      */
-    protected function set_in_persist_cache() {
-        throw new coding_exception('cache::set_in_persist_cache() can not be used anymore.' .
-            ' Please use cache::static_acceleration_set() instead.');
+    protected function set_in_persist_cache($key, $data) {
+        debugging('This function has been deprecated. Please call static_acceleration_set instead', DEBUG_DEVELOPER);
+        return $this->static_acceleration_set($key, $data);
     }
 
     /**
@@ -1146,12 +1100,16 @@ class cache implements cache_loader {
     }
 
     /**
+     * Deletes an item from the static acceleration array.
+     *
      * @deprecated since 2.6
      * @see cache::static_acceleration_delete()
+     * @param string|int $key As given to get|set|delete
+     * @return bool True on success, false otherwise.
      */
-    protected function delete_from_persist_cache() {
-        throw new coding_exception('cache::delete_from_persist_cache() can not be used anymore.' .
-            ' Please use cache::static_acceleration_delete() instead.');
+    protected function delete_from_persist_cache($key) {
+        debugging('This function has been deprecated. Please call static_acceleration_delete instead', DEBUG_DEVELOPER);
+        return $this->static_acceleration_delete($key);
     }
 
     /**
@@ -1273,7 +1231,54 @@ class cache_application extends cache implements cache_loader_with_locking {
             $this->requirelockingwrite = $definition->require_locking_write();
         }
 
-        $this->handle_invalidation_events();
+        if ($definition->has_invalidation_events()) {
+            $lastinvalidation = $this->get('lastinvalidation');
+            if ($lastinvalidation === false) {
+                // This is a new session, there won't be anything to invalidate. Set the time of the last invalidation and
+                // move on.
+                $this->set('lastinvalidation', cache::now());
+                return;
+            } else if ($lastinvalidation == cache::now()) {
+                // We've already invalidated during this request.
+                return;
+            }
+
+            // Get the event invalidation cache.
+            $cache = cache::make('core', 'eventinvalidation');
+            $events = $cache->get_many($definition->get_invalidation_events());
+            $todelete = array();
+            $purgeall = false;
+            // Iterate the returned data for the events.
+            foreach ($events as $event => $keys) {
+                if ($keys === false) {
+                    // No data to be invalidated yet.
+                    continue;
+                }
+                // Look at each key and check the timestamp.
+                foreach ($keys as $key => $timestamp) {
+                    // If the timestamp of the event is more than or equal to the last invalidation (happened between the last
+                    // invalidation and now)then we need to invaliate the key.
+                    if ($timestamp >= $lastinvalidation) {
+                        if ($key === 'purged') {
+                            $purgeall = true;
+                            break;
+                        } else {
+                            $todelete[] = $key;
+                        }
+                    }
+                }
+            }
+            if ($purgeall) {
+                $this->purge();
+            } else if (!empty($todelete)) {
+                $todelete = array_unique($todelete);
+                $this->delete_many($todelete);
+            }
+            // Set the time of the last invalidation.
+            if ($purgeall || !empty($todelete)) {
+                $this->set('lastinvalidation', cache::now());
+            }
+        }
     }
 
     /**
@@ -1627,7 +1632,54 @@ class cache_session extends cache {
         // This will trigger check tracked user. If this gets removed a call to that will need to be added here in its place.
         $this->set(self::LASTACCESS, cache::now());
 
-        $this->handle_invalidation_events();
+        if ($definition->has_invalidation_events()) {
+            $lastinvalidation = $this->get('lastsessioninvalidation');
+            if ($lastinvalidation === false) {
+                // This is a new session, there won't be anything to invalidate. Set the time of the last invalidation and
+                // move on.
+                $this->set('lastsessioninvalidation', cache::now());
+                return;
+            } else if ($lastinvalidation == cache::now()) {
+                // We've already invalidated during this request.
+                return;
+            }
+
+            // Get the event invalidation cache.
+            $cache = cache::make('core', 'eventinvalidation');
+            $events = $cache->get_many($definition->get_invalidation_events());
+            $todelete = array();
+            $purgeall = false;
+            // Iterate the returned data for the events.
+            foreach ($events as $event => $keys) {
+                if ($keys === false) {
+                    // No data to be invalidated yet.
+                    continue;
+                }
+                // Look at each key and check the timestamp.
+                foreach ($keys as $key => $timestamp) {
+                    // If the timestamp of the event is more than or equal to the last invalidation (happened between the last
+                    // invalidation and now)then we need to invaliate the key.
+                    if ($timestamp >= $lastinvalidation) {
+                        if ($key === 'purged') {
+                            $purgeall = true;
+                            break;
+                        } else {
+                            $todelete[] = $key;
+                        }
+                    }
+                }
+            }
+            if ($purgeall) {
+                $this->purge();
+            } else if (!empty($todelete)) {
+                $todelete = array_unique($todelete);
+                $this->delete_many($todelete);
+            }
+            // Set the time of the last invalidation.
+            if ($purgeall || !empty($todelete)) {
+                $this->set('lastsessioninvalidation', cache::now());
+            }
+        }
     }
 
     /**

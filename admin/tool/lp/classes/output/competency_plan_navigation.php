@@ -27,8 +27,7 @@ use renderable;
 use renderer_base;
 use templatable;
 use context_course;
-use core_competency\external\competency_exporter;
-use core_competency\external\performance_helper;
+use \core_competency\external\competency_exporter;
 use stdClass;
 
 /**
@@ -83,9 +82,13 @@ class competency_plan_navigation implements renderable, templatable {
 
         $plancompetencies = \core_competency\api::list_plan_competencies($data->planid);
         $data->competencies = array();
-        $helper = new performance_helper();
+        $contextcache = array();
         foreach ($plancompetencies as $plancompetency) {
-            $context = $helper->get_context_from_competency($plancompetency->competency);
+            $frameworkid = $plancompetency->competency->get_competencyframeworkid();
+            if (!isset($contextcache[$frameworkid])) {
+                $contextcache[$frameworkid] = $plancompetency->competency->get_context();
+            }
+            $context = $contextcache[$frameworkid];
             $exporter = new competency_exporter($plancompetency->competency, array('context' => $context));
             $competency = $exporter->export($output);
             if ($competency->id == $this->competencyid) {

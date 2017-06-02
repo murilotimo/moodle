@@ -42,15 +42,15 @@ class quiz_last_responses_table extends quiz_attempts_report_table {
      * @param context $context
      * @param string $qmsubselect
      * @param quiz_responses_options $options
-     * @param \core\dml\sql_join $groupstudentsjoins
-     * @param \core\dml\sql_join $studentsjoins
+     * @param array $groupstudents
+     * @param array $students
      * @param array $questions
      * @param moodle_url $reporturl
      */
     public function __construct($quiz, $context, $qmsubselect, quiz_responses_options $options,
-            \core\dml\sql_join $groupstudentsjoins, \core\dml\sql_join $studentsjoins, $questions, $reporturl) {
+            $groupstudents, $students, $questions, $reporturl) {
         parent::__construct('mod-quiz-report-responses-report', $quiz, $context,
-                $qmsubselect, $options, $groupstudentsjoins, $studentsjoins, $questions, $reporturl);
+                $qmsubselect, $options, $groupstudents, $students, $questions, $reporturl);
     }
 
     public function build_table() {

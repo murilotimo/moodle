@@ -97,8 +97,6 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
      * Make form submit via ajax.
      *
      * @private
-     * @param {Object} event
-     * @param {Integer} nextUserId
      * @method _submitForm
      */
     GradingPanel.prototype._submitForm = function(event, nextUserId) {
@@ -142,8 +140,8 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
             $(document).trigger('reset', [this._lastUserId, formdata]);
         } else {
             str.get_strings([
-                {key: 'changessaved', component: 'core'},
-                {key: 'gradechangessaveddetail', component: 'mod_assign'},
+                { key: 'changessaved', component: 'core' },
+                { key: 'gradechangessaveddetail', component: 'mod_assign' },
             ]).done(function(strs) {
                 notification.alert(strs[0], strs[1]);
             }).fail(notification.exception);
@@ -182,7 +180,6 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
      * Open a picker to choose an older attempt.
      *
      * @private
-     * @param {Object} e
      * @method _chooseAttempt
      */
     GradingPanel.prototype._chooseAttempt = function(e) {
@@ -196,9 +193,9 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
         var formhtml = formcopy.wrap($('<form/>')).html();
 
         str.get_strings([
-            {key: 'viewadifferentattempt', component: 'mod_assign'},
-            {key: 'view', component: 'core'},
-            {key: 'cancel', component: 'core'},
+            { key: 'viewadifferentattempt', component: 'mod_assign' },
+            { key: 'view', component: 'core' },
+            { key: 'cancel', component: 'core' },
         ]).done(function(strs) {
             notification.confirm(strs[0], formhtml, strs[1], strs[2], function() {
                 var attemptnumber = $("input:radio[name='select-attemptnumber']:checked").val();
@@ -213,15 +210,15 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
      *
      * @private
      * @method _addPopoutButtons
-     * @param {JQuery} selector The region selector to add popout buttons to.
+     * @param {JQuery} region The region to add popout buttons to.
      */
     GradingPanel.prototype._addPopoutButtons = function(selector) {
         var region = $(selector);
 
         templates.render('mod_assign/popout_button', {}).done(function(html) {
-            var parents = region.find('[data-fieldtype="filemanager"],[data-fieldtype="editor"],[data-fieldtype="grading"]')
-                    .closest('.fitem');
-            parents.addClass('has-popout').find('label').parent().append(html);
+            region.find('.fitem_ffilemanager .fitemtitle').append(html);
+            region.find('.fitem_feditor .fitemtitle').append(html);
+            region.find('.fitem_f .fitemtitle').append(html);
 
             region.on('click', '[data-region="popout-button"]', this._togglePopout.bind(this));
         }.bind(this)).fail(notification.exception);
@@ -253,8 +250,7 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
      * @method _refreshGradingPanel
      * @param {Event} event
      * @param {Number} userid
-     * @param {String} submissiondata serialised submission data.
-     * @param {Integer} attemptnumber
+     * @param {String} serialised submission data.
      */
     GradingPanel.prototype._refreshGradingPanel = function(event, userid, submissiondata, attemptnumber) {
         var contextid = this._region.attr('data-contextid');
@@ -280,7 +276,7 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
                 if (userid > 0) {
                     this._region.show();
                     // Reload the grading form "fragment" for this user.
-                    var params = {userid: userid, attemptnumber: attemptnumber, jsonformdata: JSON.stringify(submissiondata)};
+                    var params = { userid: userid, attemptnumber: attemptnumber, jsonformdata: JSON.stringify(submissiondata) };
                     fragment.loadFragment('mod_assign', 'gradingpanel', contextid, params).done(function(html, js) {
                         this._niceReplaceNodeContents(this._region, html, js)
                         .done(function() {
@@ -298,10 +294,12 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
                         }.bind(this))
                         .fail(notification.exception);
                     }.bind(this)).fail(notification.exception);
-                    $('[data-region="review-panel"]').show();
                 } else {
                     this._region.hide();
-                    $('[data-region="review-panel"]').hide();
+                    var reviewPanel = $('[data-region="review-panel"]');
+                    if (reviewPanel.length) {
+                        this._niceReplaceNodeContents(reviewPanel, '', '');
+                    }
                     $(document).trigger('finish-loading-user');
                     // Tell behat we are friends again.
                     window.M.util.js_complete('mod-assign-loading-user');
@@ -345,11 +343,6 @@ define(['jquery', 'core/yui', 'core/notification', 'core/templates', 'core/fragm
      */
     GradingPanel.prototype.registerEventListeners = function() {
         var docElement = $(document);
-        var region = $(this._region);
-        // Add an event listener to prevent form submission when pressing enter key.
-        region.on('submit', 'form', function(e) {
-            e.preventDefault();
-        });
 
         docElement.on('user-changed', this._refreshGradingPanel.bind(this));
         docElement.on('save-changes', this._submitForm.bind(this));

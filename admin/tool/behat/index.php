@@ -45,8 +45,7 @@ $steps = tool_behat::stepsdefinitions($type, $component, $filter);
 $componentswithsteps = array('' => get_string('allavailablesteps', 'tool_behat'));
 
 // Complete the components list with the moodle steps definitions.
-$behatconfig = new behat_config_util();
-$components = $behatconfig->get_components_contexts();
+$components = behat_config_manager::get_components_steps_definitions();
 if ($components) {
     foreach ($components as $component => $filepath) {
         // TODO Use a class static attribute instead of the class name.

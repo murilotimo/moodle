@@ -23,7 +23,7 @@
  */
 
 
-require_once(__DIR__ . '/../../config.php');
+require_once(dirname(__FILE__) . '/../../config.php');
 require_once($CFG->dirroot.'/mod/lesson/lib.php');
 require_once($CFG->dirroot.'/mod/lesson/locallib.php');
 require_once($CFG->dirroot.'/mod/lesson/override_form.php');
@@ -196,14 +196,7 @@ if ($mform->is_cancelled()) {
         $event->trigger();
     }
 
-    if ($groupmode) {
-        // Priorities may have shifted, so we need to update all of the calendar events for group overrides.
-        lesson_update_events($lesson);
-    } else {
-        // User override. We only need to update the calendar event for this user override.
-        lesson_update_events($lesson, $fromform);
-    }
-
+    lesson_update_events($lesson, $fromform);
 
     if (!empty($fromform->submitbutton)) {
         redirect($overridelisturl);

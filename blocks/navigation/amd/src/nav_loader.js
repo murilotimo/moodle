@@ -29,8 +29,8 @@ define(['jquery', 'core/ajax', 'core/config', 'block_navigation/ajax_response_re
          * Get the block instance id.
          *
          * @function getBlockInstanceId
-         * @param {Element} element
-         * @returns {String} the instance id
+         * @param element
+         * @returns {*}
          */
         function getBlockInstanceId(element) {
             return element.closest('[data-block]').attr('data-instanceid');

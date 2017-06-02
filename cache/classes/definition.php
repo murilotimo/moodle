@@ -247,6 +247,13 @@ class cache_definition {
     protected $datasourcefile = null;
 
     /**
+     * Deprecated - this is completely unused.
+     * @deprecated since 2.9
+     * @var string
+     */
+    protected $datasourceaggregate = null;
+
+    /**
      * Set to true if the cache should hold onto items passing through it to speed up subsequent requests.
      * @var bool
      */
@@ -788,12 +795,10 @@ class cache_definition {
      * @throws coding_exception
      */
     public function set_identifiers(array $identifiers = array()) {
-        if ($this->identifiers !== null) {
-            throw new coding_exception("You can only set identifiers on initial definition creation." .
-                " Define a new cache to set different identifiers.");
-        }
-        if (!empty($identifiers) && !empty($this->invalidationevents)) {
-            throw new coding_exception("You cannot use event invalidation and identifiers at the same time.");
+        // If we are setting the exact same identifiers then just return as nothing really changed.
+        // We don't care about order as cache::make will use the same definition order all the time.
+        if ($identifiers === $this->identifiers) {
+            return false;
         }
 
         foreach ($this->requireidentifiers as $identifier) {
@@ -833,14 +838,17 @@ class cache_definition {
     }
 
     /**
+     * Returns true if this definitions cache should be made persistent.
+     *
      * Please call {@link cache_definition::use_static_acceleration()} instead.
      *
      * @see cache_definition::use_static_acceleration()
      * @deprecated since 2.6
+     * @return bool
      */
     public function should_be_persistent() {
-        throw new coding_exception('cache_definition::should_be_persistent() can not be used anymore.' .
-            ' Please use cache_definition::use_static_acceleration() instead.');
+        debugging('Please upgrade your code to use cache_definition::use_static_acceleration', DEBUG_DEVELOPER);
+        return $this->use_static_acceleration();
     }
 
     /**
@@ -860,14 +868,17 @@ class cache_definition {
     }
 
     /**
+     * Returns the max size for the static acceleration array.
+     *
      * Please call {@link cache_definition::get_static_acceleration_size()} instead.
      *
      * @see cache_definition::get_static_acceleration_size()
      * @deprecated since 2.6
+     * @return int
      */
     public function get_persistent_max_size() {
-        throw new coding_exception('cache_definition::get_persistent_max_size() can not be used anymore.' .
-            ' Please use cache_definition::get_static_acceleration_size() instead.');
+        debugging('Please upgrade your code to call cache_definition::get_static_acceleration_size', DEBUG_DEVELOPER);
+        return $this->get_static_acceleration_size();
     }
 
     /**

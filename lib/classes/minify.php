@@ -35,9 +35,18 @@ class core_minify {
      * @return string minified JS code
      */
     public static function js($content) {
+        global $CFG;
+        require_once("$CFG->libdir/minify/lib/JSMinPlus.php");
+
         try {
-            $minifier = new MatthiasMullie\Minify\JS($content);
-            return $minifier->minify();
+            ob_start(); // JSMinPlus just echos errors, weird...
+            $compressed = JSMinPlus::minify($content);
+            if ($compressed !== false) {
+                ob_end_clean();
+                return $compressed;
+            }
+            $error = ob_get_clean();
+
         } catch (Exception $e) {
             ob_end_clean();
             $error = $e->getMessage();
@@ -88,10 +97,16 @@ EOD;
      * @return string minified CSS
      */
     public static function css($content) {
+        global $CFG;
+        require_once("$CFG->libdir/minify/lib/Minify/CSS/Compressor.php");
+
         $error = 'unknown';
         try {
-            $minifier = new MatthiasMullie\Minify\CSS($content);
-            return $minifier->minify();
+            $compressed = Minify_CSS_Compressor::process($content);
+            if ($compressed !== false) {
+                return $compressed;
+            }
+
         } catch (Exception $e) {
             $error = $e->getMessage();
         }

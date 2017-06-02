@@ -16,7 +16,8 @@ Feature: Edit activity name in-place
       | user | course | role |
       | teacher1 | C1 | editingteacher |
     When I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Description | Test forum description |
@@ -27,7 +28,7 @@ Feature: Edit activity name in-place
     Then I should not see "Test forum name" in the ".course-content" "css_element"
     And "New name for activity Test forum name" "field" should not exist
     And I should see "Good news"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I should see "Good news"
     And I should not see "Test forum name"
     # Cancel renaming
@@ -37,7 +38,7 @@ Feature: Edit activity name in-place
     And "New name for activity Good news" "field" should not exist
     And I should see "Good news"
     And I should not see "Terrible news"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     And I should see "Good news"
     And I should not see "Terrible news"
     And I log out

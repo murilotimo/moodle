@@ -17,7 +17,9 @@ Feature: View the user page for the outline report
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     When I log in as "admin"
-    And I am on "Course 1" course homepage with editing mode on
+    And I am on site homepage
+    And I follow "Course 1"
+    And I turn editing mode on
     And I add a "Folder" to section "1" and I fill the form with:
       | Name | Folder name |
       | Description | Folder description |
@@ -34,24 +36,24 @@ Feature: View the user page for the outline report
       | loglegacy | 1 | logstore_legacy |
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     # We want to view this multiple times, to make sure the count is working.
     And I follow "Folder name"
     And I follow "Folder name"
     And I follow "Folder name"
     And I follow "Folder name"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     # We want to view this multiple times, to make sure the count is working.
     And I follow "URL name"
     And I follow "URL name"
     And I follow "URL name"
     And I follow "Profile" in the user menu
-    And I click on "Course 1" "link" in the "region-main" "region"
+    And I follow "Course 1"
     When I follow "Outline report"
     Then I should see "4 views" in the "Folder name" "table_row"
     And I should see "3 views" in the "URL name" "table_row"
     And I follow "Profile" in the user menu
-    And I click on "Course 1" "link" in the "region-main" "region"
+    And I follow "Course 1"
     And I follow "Complete report"
     And I should see "4 views"
     And I should see "3 views"
@@ -62,24 +64,24 @@ Feature: View the user page for the outline report
     And "Disable" "link" should exist in the "Standard log" "table_row"
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     # We want to view this multiple times, to make sure the count is working.
     And I follow "Folder name"
     And I follow "Folder name"
     And I follow "Folder name"
     And I follow "Folder name"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     # We want to view this multiple times, to make sure the count is working.
     And I follow "URL name"
     And I follow "URL name"
     And I follow "URL name"
     And I follow "Profile" in the user menu
-    And I click on "Course 1" "link" in the "region-main" "region"
+    And I follow "Course 1"
     When I follow "Outline report"
     Then I should see "4 views" in the "Folder name" "table_row"
     And I should see "3 views" in the "URL name" "table_row"
     And I follow "Profile" in the user menu
-    And I click on "Course 1" "link" in the "region-main" "region"
+    And I follow "Course 1"
     When I follow "Complete report"
     And I should see "4 views"
     And I should see "3 views"
@@ -92,24 +94,24 @@ Feature: View the user page for the outline report
       | loglegacy | 1 | logstore_legacy |
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     # We want to view this multiple times, to make sure the count is working.
     And I follow "Folder name"
     And I follow "Folder name"
     And I follow "Folder name"
     And I follow "Folder name"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     # We want to view this multiple times, to make sure the count is working.
     And I follow "URL name"
     And I follow "URL name"
     And I follow "URL name"
     And I follow "Profile" in the user menu
-    And I click on "Course 1" "link" in the "region-main" "region"
+    And I follow "Course 1"
     When I follow "Outline report"
     Then I should see "4 views" in the "Folder name" "table_row"
     And I should see "3 views" in the "URL name" "table_row"
     And I follow "Profile" in the user menu
-    And I click on "Course 1" "link" in the "region-main" "region"
+    And I follow "Course 1"
     When I follow "Complete report"
     And I should see "4 views"
     And I should see "3 views"

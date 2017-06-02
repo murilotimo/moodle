@@ -71,7 +71,27 @@ if ($userid == $USER->id) {
     $PAGE->navigation->extend_for_user($user);
 }
 
-$access = grade_report_overview::check_access($systemcontext, $context, $personalcontext, $course, $userid);
+$access = false;
+if (has_capability('moodle/grade:viewall', $systemcontext)) {
+    // Ok - can view all course grades.
+    $access = true;
+
+} else if (has_capability('moodle/grade:viewall', $context)) {
+    // Ok - can view any grades in context.
+    $access = true;
+
+} else if ($userid == $USER->id and ((has_capability('moodle/grade:view', $context) and $course->showgrades)
+        || $courseid == SITEID)) {
+    // Ok - can view own course grades.
+    $access = true;
+
+} else if (has_capability('moodle/grade:viewall', $personalcontext) and $course->showgrades) {
+    // Ok - can view grades of this user - parent most probably.
+    $access = true;
+} else if (has_capability('moodle/user:viewuseractivitiesreport', $personalcontext) and $course->showgrades) {
+    // Ok - can view grades of this user - parent most probably.
+    $access = true;
+}
 
 if (!$access) {
     // no access to grades!
@@ -194,6 +214,15 @@ if (has_capability('moodle/grade:viewall', $context) && $courseid != SITEID) {
     }
 }
 
-grade_report_overview::viewed($context, $courseid, $userid);
+$event = \gradereport_overview\event\grade_report_viewed::create(
+    array(
+        'context' => $context,
+        'courseid' => $courseid,
+        'relateduserid' => $userid,
+    )
+);
+$event->trigger();
 
 echo $OUTPUT->footer();
+
+

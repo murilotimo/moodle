@@ -13,7 +13,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
 
     initializer: function() {
         // Set group for parent class
-        this.groups = [CSS.SECTIONDRAGGABLE];
+        this.groups = [ CSS.SECTIONDRAGGABLE ];
         this.samenodeclass = 'section';
         this.parentnodeclass = 'slots';
 
@@ -192,9 +192,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                             new M.core.ajaxException(responsetext);
                         }
                         M.mod_quiz.edit.process_sections(Y, sectionlist, responsetext, loopstart, loopend);
-                    } catch (e) {
-                        // Ignore.
-                    }
+                    } catch (e) {}
 
                     // Update all of the section IDs - first unset them, then set them
                     // to avoid duplicates in the DOM.
@@ -236,7 +234,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                     lightbox.hide();
                 }
             },
-            context: this
+            context:this
         });
     }
 

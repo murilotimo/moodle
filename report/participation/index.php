@@ -75,8 +75,8 @@ if (!array_key_exists($action, $actionoptions)) {
     $action = '';
 }
 
-$PAGE->set_title(format_string($course->shortname, true, array('context' => $context)) .': '. $strparticipation);
-$PAGE->set_heading(format_string($course->fullname, true, array('context' => $context)));
+$PAGE->set_title($course->shortname .': '. $strparticipation);
+$PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
 $uselegacyreader = false; // Use legacy reader with sql_internal_table_reader to aggregate records.
@@ -327,7 +327,7 @@ if (!empty($instanceid) && !empty($roleid)) {
 
     $a = new stdClass();
     $a->count = $totalcount;
-    $a->items = format_string($role->name, true, array('context' => $context));
+    $a->items = $role->name;
 
     if ($matchcount != $totalcount) {
         $a->count = $matchcount.'/'.$a->count;
@@ -370,20 +370,19 @@ if (!empty($instanceid) && !empty($roleid)) {
     }
 
     if (!empty($CFG->messaging)) {
-        $buttonclasses = 'btn btn-secondary';
-        echo '<div class="selectbuttons btn-group">';
-        echo '<input type="button" id="checkall" value="'.get_string('selectall').'" class="'. $buttonclasses .'"> '."\n";
-        echo '<input type="button" id="checknone" value="'.get_string('deselectall').'" class="'. $buttonclasses .'"> '."\n";
+        echo '<div class="selectbuttons">';
+        echo '<input type="button" id="checkall" value="'.get_string('selectall').'" /> '."\n";
+        echo '<input type="button" id="checknone" value="'.get_string('deselectall').'" /> '."\n";
         if ($perpage >= $matchcount) {
-            echo '<input type="button" id="checknos" value="'.get_string('selectnos').'" class="'. $buttonclasses .'">'."\n";
+            echo '<input type="button" id="checknos" value="'.get_string('selectnos').'" />'."\n";
         }
         echo '</div>';
-        echo '<div class="p-y-1">';
+        echo '<div>';
         echo html_writer::label(get_string('withselectedusers'), 'formactionselect');
         $displaylist['messageselect.php'] = get_string('messageselectadd');
         echo html_writer::select($displaylist, 'formaction', '', array('' => 'choosedots'), array('id' => 'formactionselect'));
         echo $OUTPUT->help_icon('withselectedusers');
-        echo '<input type="submit" value="' . get_string('ok') . '" class="'. $buttonclasses .'"/>'."\n";
+        echo '<input type="submit" value="' . get_string('ok') . '" />'."\n";
         echo '</div>';
         echo '</div>'."\n";
         echo '</form>'."\n";

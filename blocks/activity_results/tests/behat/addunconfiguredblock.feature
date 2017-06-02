@@ -1,5 +1,5 @@
 @block @block_activity_results
-Feature: The activity results block doesn't displays student scores for unconfigured block
+Feature: The activity results block displays student scores
   In order to be display student scores
   As a user
   I need to see the activity results block
@@ -15,7 +15,8 @@ Feature: The activity results block doesn't displays student scores for unconfig
       | user | course | role |
       | teacher1 | C1 | editingteacher |
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
 
   Scenario: Add the block to a the course
     Given I add the "Activity results" block

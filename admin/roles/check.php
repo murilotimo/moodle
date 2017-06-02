@@ -22,10 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(__DIR__ . '/../../config.php');
+require_once(dirname(__FILE__) . '/../../config.php');
 
 $contextid = required_param('contextid', PARAM_INT);
-$returnurl  = optional_param('returnurl', null, PARAM_LOCALURL);
 
 list($context, $course, $cm) = get_context_info_array($contextid);
 
@@ -50,13 +49,7 @@ require_login($course, false, $cm);
 if (!has_any_capability(array('moodle/role:assign', 'moodle/role:safeoverride', 'moodle/role:override', 'moodle/role:manage'), $context)) {
     print_error('nopermissions', 'error', '', get_string('checkpermissions', 'core_role'));
 }
-
-navigation_node::override_active_url($url);
-$pageurl = new moodle_url($url);
-if ($returnurl) {
-    $pageurl->param('returnurl', $returnurl);
-}
-$PAGE->set_url($pageurl);
+$PAGE->set_url($url);
 
 if ($context->contextlevel == CONTEXT_USER and $USER->id != $context->instanceid) {
     $PAGE->navbar->includesettingsbase = true;
@@ -82,10 +75,6 @@ $userselector->set_rows(20);
 $title = get_string('checkpermissionsin', 'core_role', $contextname);
 
 $PAGE->set_pagelayout('admin');
-if ($context->contextlevel == CONTEXT_BLOCK) {
-    // Do not show blocks when changing block's settings, it is confusing.
-    $PAGE->blocks->show_only_fake_blocks(true);
-}
 $PAGE->set_title($title);
 
 switch ($context->contextlevel) {
@@ -167,27 +156,30 @@ if (!is_null($reportuser)) {
 
 // Show UI for choosing a user to report on.
 echo $OUTPUT->box_start('generalbox boxwidthnormal boxaligncenter', 'chooseuser');
-echo '<form method="post" action="' . $PAGE->url . '" >';
+echo '<form method="get" action="' . $CFG->wwwroot . '/' . $CFG->admin . '/roles/check.php" >';
+
+// Hidden fields.
+echo '<input type="hidden" name="contextid" value="' . $context->id . '" />';
+if (!empty($user->id)) {
+    echo '<input type="hidden" name="userid" value="' . $user->id . '" />';
+}
+if ($isfrontpage) {
+    echo '<input type="hidden" name="courseid" value="' . $courseid . '" />';
+}
 
 // User selector.
 echo $OUTPUT->heading('<label for="reportuser">' . $selectheading . '</label>', 3);
 $userselector->display();
 
 // Submit button and the end of the form.
-echo '<p id="chooseusersubmit"><input type="submit" value="' . get_string('showthisuserspermissions', 'core_role') . '" ' .
-     'class="btn btn-primary"/></p>';
+echo '<p id="chooseusersubmit"><input type="submit" value="' . get_string('showthisuserspermissions', 'core_role') . '" /></p>';
 echo '</form>';
 echo $OUTPUT->box_end();
 
 // Appropriate back link.
 if ($context->contextlevel > CONTEXT_USER) {
     echo html_writer::start_tag('div', array('class'=>'backlink'));
-    if ($returnurl) {
-        $backurl = new moodle_url($returnurl);
-    } else {
-        $backurl = $context->get_url();
-    }
-    echo html_writer::link($backurl, get_string('backto', '', $contextname));
+    echo html_writer::tag('a', get_string('backto', '', $contextname), array('href'=>$context->get_url()));
     echo html_writer::end_tag('div');
 }
 

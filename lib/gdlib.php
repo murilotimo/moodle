@@ -270,133 +270,6 @@ function process_new_icon($context, $component, $filearea, $itemid, $originalfil
     return $file1->get_id();
 }
 
-
-/**
- * Resize an image from an image path.
- *
- * This maintains the aspect ratio of the image.
- * This will not enlarge the image.
- *
- * @param string $filepath The full path to the original image file.
- * @param int|null $width The max width of the resized image, or null to only use the height.
- * @param int|null $height The max height of the resized image, or null to only use the width.
- * @param bool $forcecanvas Whether the final dimensions should be set to $width and $height.
- * @return string|bool False if a problem occurs, else the resized image data.
- */
-function resize_image($filepath, $width, $height, $forcecanvas = false) {
-    if (empty($filepath)) {
-        return false;
-    }
-
-    // Fetch the image information for this image.
-    $imageinfo = @getimagesize($filepath);
-    if (empty($imageinfo)) {
-        return false;
-    }
-
-    // Create a new image from the file.
-    $original = @imagecreatefromstring(file_get_contents($filepath));
-
-    // Generate the thumbnail.
-    return resize_image_from_image($original, $imageinfo, $width, $height, $forcecanvas);
-}
-
-/**
- * Resize an image from an image object.
- *
- * @param resource $original The image to work on.
- * @param array $imageinfo Contains [0] => originalwidth, [1] => originalheight.
- * @param int|null $width The max width of the resized image, or null to only use the height.
- * @param int|null $height The max height of the resized image, or null to only use the width.
- * @param bool $forcecanvas Whether the final dimensions should be set to $width and $height.
- * @return string|bool False if a problem occurs, else the resized image data.
- */
-function resize_image_from_image($original, $imageinfo, $width, $height, $forcecanvas = false) {
-    global $CFG;
-
-    if (empty($width) && empty($height) || ($forcecanvas && (empty($width) || empty($height)))) {
-        // We need do not have the required ddimensions to work with.
-        return false;
-    }
-
-    if (empty($imageinfo)) {
-        return false;
-    }
-
-    $originalwidth  = $imageinfo[0];
-    $originalheight = $imageinfo[1];
-    if (empty($originalwidth) or empty($originalheight)) {
-        return false;
-    }
-
-    if (function_exists('imagepng')) {
-        $imagefnc = 'imagepng';
-        $filters = PNG_NO_FILTER;
-        $quality = 1;
-    } else if (function_exists('imagejpeg')) {
-        $imagefnc = 'imagejpeg';
-        $filters = null;
-        $quality = 90;
-    } else {
-        debugging('Neither JPEG nor PNG are supported at this server, please fix the system configuration.');
-        return false;
-    }
-
-    if (empty($height)) {
-        $ratio = $width / $originalwidth;
-    } else if (empty($width)) {
-        $ratio = $height / $originalheight;
-    } else {
-        $ratio = min($width / $originalwidth, $height / $originalheight);
-    }
-
-    if ($ratio < 1) {
-        $targetwidth    = floor($originalwidth * $ratio);
-        $targetheight   = floor($originalheight * $ratio);
-    } else {
-        // Do not enlarge the original file if it is smaller than the requested thumbnail size.
-        $targetwidth    = $originalwidth;
-        $targetheight   = $originalheight;
-    }
-
-    $canvaswidth = $targetwidth;
-    $canvasheight = $targetheight;
-    $dstx = 0;
-    $dsty = 0;
-
-    if ($forcecanvas) {
-        $canvaswidth = $width;
-        $canvasheight = $height;
-        $dstx = floor(($width - $targetwidth) / 2);
-        $dsty = floor(($height - $targetheight) / 2);
-    }
-
-    if (function_exists('imagecreatetruecolor')) {
-        $newimage = imagecreatetruecolor($canvaswidth, $canvasheight);
-        if ($imagefnc === 'imagepng') {
-            imagealphablending($newimage, false);
-            imagefill($newimage, 0, 0, imagecolorallocatealpha($newimage, 0, 0, 0, 127));
-            imagesavealpha($newimage, true);
-        }
-    } else {
-        $newimage = imagecreate($canvaswidth, $canvasheight);
-    }
-
-    imagecopybicubic($newimage, $original, $dstx, $dsty, 0, 0, $targetwidth, $targetheight, $originalwidth, $originalheight);
-
-    // Capture the image as a string object, rather than straight to file.
-    ob_start();
-    if (!$imagefnc($newimage, null, $quality, $filters)) {
-        ob_end_clean();
-        return false;
-    }
-    $data = ob_get_clean();
-    imagedestroy($original);
-    imagedestroy($newimage);
-
-    return $data;
-}
-
 /**
  * Generates a thumbnail for the given image
  *
@@ -410,7 +283,21 @@ function resize_image_from_image($original, $imageinfo, $width, $height, $forcec
  * @return string|bool false if a problem occurs, the thumbnail image data otherwise
  */
 function generate_image_thumbnail($filepath, $width, $height) {
-    return resize_image($filepath, $width, $height, true);
+    if (empty($filepath) or empty($width) or empty($height)) {
+        return false;
+    }
+
+    // Fetch the image information for this image.
+    $imageinfo = @getimagesize($filepath);
+    if (empty($imageinfo)) {
+        return false;
+    }
+
+    // Create a new image from the file.
+    $original = @imagecreatefromstring(file_get_contents($filepath));
+
+    // Generate the thumbnail.
+    return generate_image_thumbnail_from_image($original, $imageinfo, $width, $height);
 }
 
 /**
@@ -450,12 +337,71 @@ function generate_image_thumbnail_from_string($filedata, $width, $height) {
  * is the content of a transparent PNG file containing the thumbnail. Otherwise, the function
  * returns contents of a JPEG file with black background containing the thumbnail.
  *
- * @param   resource $original The image to work on.
- * @param   array $imageinfo Contains [0] => originalwidth, [1] => originalheight.
- * @param   int $width The width of the requested thumbnail.
- * @param   int $height The height of the requested thumbnail.
- * @return  string|bool False if a problem occurs, the thumbnail image data otherwise.
+ * @param   string $original The image content as a string
+ * @return  string|bool false if a problem occurs, the thumbnail image data otherwise
  */
 function generate_image_thumbnail_from_image($original, $imageinfo, $width, $height) {
-    return resize_image_from_image($original, $imageinfo, $width, $height, true);
+    global $CFG;
+
+    if (empty($imageinfo)) {
+        return false;
+    }
+    $originalwidth  = $imageinfo[0];
+    $originalheight = $imageinfo[1];
+
+    if (empty($originalwidth) or empty($originalheight)) {
+        return false;
+    }
+
+    if (function_exists('imagepng')) {
+        $imagefnc = 'imagepng';
+        $filters = PNG_NO_FILTER;
+        $quality = 1;
+    } else if (function_exists('imagejpeg')) {
+        $imagefnc = 'imagejpeg';
+        $filters = null;
+        $quality = 90;
+    } else {
+        debugging('Neither JPEG nor PNG are supported at this server, please fix the system configuration.');
+        return false;
+    }
+
+    if (function_exists('imagecreatetruecolor')) {
+        $thumbnail = imagecreatetruecolor($width, $height);
+        if ($imagefnc === 'imagepng') {
+            imagealphablending($thumbnail, false);
+            imagefill($thumbnail, 0, 0, imagecolorallocatealpha($thumbnail, 0, 0, 0, 127));
+            imagesavealpha($thumbnail, true);
+        }
+    } else {
+        $thumbnail = imagecreate($width, $height);
+    }
+
+    $ratio = min($width / $originalwidth, $height / $originalheight);
+
+    if ($ratio < 1) {
+        $targetwidth    = floor($originalwidth * $ratio);
+        $targetheight   = floor($originalheight * $ratio);
+    } else {
+        // Do not enlarge the original file if it is smaller than the requested thumbnail size.
+        $targetwidth    = $originalwidth;
+        $targetheight   = $originalheight;
+    }
+
+    $dstx = floor(($width - $targetwidth) / 2);
+    $dsty = floor(($height - $targetheight) / 2);
+
+    imagecopybicubic($thumbnail, $original, $dstx, $dsty, 0, 0, $targetwidth, $targetheight, $originalwidth, $originalheight);
+
+    // Capture the image as a string object, rather than straight to file.
+    ob_start();
+    if (!$imagefnc($thumbnail, null, $quality, $filters)) {
+        ob_end_clean();
+        return false;
+    }
+    $data = ob_get_clean();
+    imagedestroy($original);
+    imagedestroy($thumbnail);
+
+    return $data;
 }

@@ -62,16 +62,15 @@ class mustache_pix_helper {
     public function pix($text, Mustache_LambdaHelper $helper) {
         // Split the text into an array of variables.
         $key = strtok($text, ",");
-        $key = trim($helper->render($key));
+        $key = trim($key);
         $component = strtok(",");
-        $component = trim($helper->render($component));
+        $component = trim($component);
         if (!$component) {
             $component = '';
         }
-        $component = $helper->render($component);
         $text = strtok("");
         // Allow mustache tags in the last argument.
-        $text = trim($helper->render($text));
+        $text = $helper->render($text);
 
         return trim($this->renderer->pix_icon($key, $text, $component));
     }

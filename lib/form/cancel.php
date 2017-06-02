@@ -110,4 +110,12 @@ class MoodleQuickForm_cancel extends MoodleQuickForm_submit
         return HTML_QuickForm_submit::getFrozenHtml();
     }
 
+    /**
+     * Freeze the element so that only its value is returned
+     *
+     * @return bool
+     */
+    function freeze(){
+        return HTML_QuickForm_submit::freeze();
+    }
 }

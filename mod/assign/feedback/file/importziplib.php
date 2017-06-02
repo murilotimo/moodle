@@ -118,7 +118,7 @@ class assignfeedback_file_zip_importer {
                 $contenthash = '';
                 if (is_array($file)) {
                     $content = reset($file);
-                    $contenthash = file_storage::hash_from_string($content);
+                    $contenthash = sha1($content);
                 } else {
                     $contenthash = $file->get_contenthash();
                 }

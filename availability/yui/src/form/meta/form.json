@@ -4,7 +4,6 @@
         "base",
         "node",
         "event",
-        "event-delegate",
         "panel",
         "moodle-core-notification-dialogue",
         "json"

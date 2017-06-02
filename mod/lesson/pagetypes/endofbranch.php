@@ -51,14 +51,14 @@ class lesson_page_type_endofbranch extends lesson_page {
     public function get_idstring() {
         return $this->typeidstring;
     }
-    public function callback_on_view($canmanage, $redirect = true) {
-        return (int) $this->redirect_to_first_answer($canmanage, $redirect);
+    public function callback_on_view($canmanage) {
+        $this->redirect_to_first_answer($canmanage);
+        exit;
     }
 
-    public function redirect_to_first_answer($canmanage, $redirect) {
+    public function redirect_to_first_answer($canmanage) {
         global $USER, $PAGE;
-        $answers = $this->get_answers();
-        $answer = array_shift($answers);
+        $answer = array_shift($this->get_answers());
         $jumpto = $answer->jumpto;
         if ($jumpto == LESSON_RANDOMBRANCH) {
 
@@ -93,12 +93,7 @@ class lesson_page_type_endofbranch extends lesson_page {
             $jumpto = $this->properties->prevpageid;
 
         }
-
-        if ($redirect) {
-            redirect(new moodle_url('/mod/lesson/view.php', array('id' => $PAGE->cm->id, 'pageid' => $jumpto)));
-            die;
-        }
-        return $jumpto;
+        redirect(new moodle_url('/mod/lesson/view.php', array('id'=>$PAGE->cm->id,'pageid'=>$jumpto)));
     }
     public function get_grayout() {
         return 1;

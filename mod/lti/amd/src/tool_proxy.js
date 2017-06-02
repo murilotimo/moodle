@@ -34,8 +34,8 @@ define(['core/ajax', 'core/notification'], function(ajax, notification) {
          *
          * @method query
          * @public
-         * @param {Object} args Search parameters
-         * @return {Promise} jQuery Deferred object
+         * @param object Search parameters
+         * @return object jQuery deferred object
          */
         query: function(args) {
             var request = {
@@ -54,10 +54,10 @@ define(['core/ajax', 'core/notification'], function(ajax, notification) {
          *
          * @method delete
          * @public
-         * @param {Integer} id Tool proxy ID
-         * @return {Promise} jQuery Deferred object
+         * @param int Tool proxy ID
+         * @return object jQuery deferred object
          */
-        'delete': function(id) {
+        delete: function(id) {
             var request = {
                 methodname: 'mod_lti_delete_tool_proxy',
                 args: {
@@ -81,8 +81,8 @@ define(['core/ajax', 'core/notification'], function(ajax, notification) {
          *
          * @method create
          * @public
-         * @param {Object} args Tool proxy properties
-         * @return {Promise} jQuery Deferred object
+         * @param object Tool proxy properties
+         * @return object jQuery deferred object
          */
         create: function(args) {
             var request = {

@@ -40,6 +40,8 @@ class SimpleXMLElement
         }
 
         $this->resetXMLInternalErrorsSetting();
+
+        return $this->simpleXMLElement;
     }
 
     /**

@@ -70,20 +70,13 @@ if (!empty($scorm->popup)) {
 
     $scoid = 0;
     $orgidentifier = '';
-
-    $result = scorm_get_toc($USER, $scorm, $cm->id, TOCFULLURL);
-    // Set last incomplete sco to launch first.
-    if (!empty($result->sco->id)) {
-        $scoid = $result->sco->id;
-    } else {
-        if ($sco = scorm_get_sco($scorm->launch, SCO_ONLY)) {
-            if (($sco->organization == '') && ($sco->launch == '')) {
-                $orgidentifier = $sco->identifier;
-            } else {
-                $orgidentifier = $sco->organization;
-            }
-            $scoid = $sco->id;
+    if ($sco = scorm_get_sco($scorm->launch, SCO_ONLY)) {
+        if (($sco->organization == '') && ($sco->launch == '')) {
+            $orgidentifier = $sco->identifier;
+        } else {
+            $orgidentifier = $sco->organization;
         }
+        $scoid = $sco->id;
     }
 
     if (empty($preventskip) && $scorm->skipview >= SCORM_SKIPVIEW_FIRST &&
@@ -163,20 +156,20 @@ if (empty($launch) && ($scorm->displayattemptstatus == SCORM_DISPLAY_ATTEMPTSTAT
          $scorm->displayattemptstatus == SCORM_DISPLAY_ATTEMPTSTATUS_ENTRY)) {
     $attemptstatus = scorm_get_attempt_status($USER, $scorm, $cm);
 }
-echo $OUTPUT->box(format_module_intro('scorm', $scorm, $cm->id).$attemptstatus, 'container', 'intro');
+echo $OUTPUT->box(format_module_intro('scorm', $scorm, $cm->id).$attemptstatus, 'generalbox boxaligncenter boxwidthwide', 'intro');
 
 // Check if SCORM available.
 list($available, $warnings) = scorm_get_availability_status($scorm);
 if (!$available) {
     $reason = current(array_keys($warnings));
-    echo $OUTPUT->box(get_string($reason, "scorm", $warnings[$reason]), "container");
+    echo $OUTPUT->box(get_string($reason, "scorm", $warnings[$reason]), "generalbox boxaligncenter");
 }
 
 if ($available && empty($launch)) {
     scorm_print_launch($USER, $scorm, 'view.php?id='.$cm->id, $cm);
 }
 if (!empty($forcejs)) {
-    echo $OUTPUT->box(get_string("forcejavascriptmessage", "scorm"), "container forcejavascriptmessage");
+    echo $OUTPUT->box(get_string("forcejavascriptmessage", "scorm"), "generalbox boxaligncenter forcejavascriptmessage");
 }
 
 if (!empty($scorm->popup)) {

@@ -143,16 +143,8 @@ class gradingform_rubric_controller extends gradingform_controller {
         // reload the definition from the database
         $currentdefinition = $this->get_definition(true);
 
-        $haschanges = array();
-
-        // Check if 'lockzeropoints' option has changed.
-        $newlockzeropoints = $newdefinition->rubric['options']['lockzeropoints'];
-        $currentoptions = $this->get_options();
-        if ((bool)$newlockzeropoints != (bool)$currentoptions['lockzeropoints']) {
-            $haschanges[3] = true;
-        }
-
         // update rubric data
+        $haschanges = array();
         if (empty($newdefinition->rubric['criteria'])) {
             $newcriteria = array();
         } else {
@@ -211,7 +203,10 @@ class gradingform_rubric_controller extends gradingform_controller {
             }
             foreach ($levelsdata as $levelid => $level) {
                 if (isset($level['score'])) {
-                    $level['score'] = unformat_float($level['score']);
+                    $level['score'] = (float)$level['score'];
+                    if ($level['score']<0) {
+                        $level['score'] = 0;
+                    }
                 }
                 if (preg_match('/^NEWID\d+$/', $levelid)) {
                     // insert level into DB
@@ -359,7 +354,6 @@ class gradingform_rubric_controller extends gradingform_controller {
     public static function get_default_options() {
         $options = array(
             'sortlevelsasc' => 1,
-            'lockzeropoints' => 1,
             'alwaysshowdefinition' => 1,
             'showdescriptionteacher' => 1,
             'showdescriptionstudent' => 1,
@@ -374,9 +368,6 @@ class gradingform_rubric_controller extends gradingform_controller {
     /**
      * Gets the options of this rubric definition, fills the missing options with default values
      *
-     * The only exception is 'lockzeropoints' - if other options are present in the json string but this
-     * one is absent, this means that the rubric was created before Moodle 3.2 and the 0 value should be used.
-     *
      * @return array
      */
     public function get_options() {
@@ -385,11 +376,6 @@ class gradingform_rubric_controller extends gradingform_controller {
             $thisoptions = json_decode($this->definition->options);
             foreach ($thisoptions as $option => $value) {
                 $options[$option] = $value;
-            }
-            if (!array_key_exists('lockzeropoints', $thisoptions)) {
-                // Rubrics created before Moodle 3.2 don't have 'lockzeropoints' option. In this case they should not
-                // assume default value 1 but use "legacy" value 0.
-                $options['lockzeropoints'] = 0;
             }
         }
         return $options;
@@ -536,10 +522,7 @@ class gradingform_rubric_controller extends gradingform_controller {
             $rubric .= $output->box($this->get_formatted_description(), 'gradingform_rubric-description');
         }
         if (has_capability('moodle/grade:managegradingforms', $page->context)) {
-            if (!$options['lockzeropoints']) {
-                // Warn about using grade calculation method where minimum number of points is flexible.
-                $rubric .= $output->display_rubric_mapping_explained($this->get_min_max_score());
-            }
+            $rubric .= $output->display_rubric_mapping_explained($this->get_min_max_score());
             $rubric .= $output->display_rubric($criteria, $options, self::DISPLAY_PREVIEW, 'rubric');
         } else {
             $rubric .= $output->display_rubric($criteria, $options, self::DISPLAY_PREVIEW_GRADED, 'rubric');
@@ -906,19 +889,11 @@ class gradingform_rubric_instance extends gradingform_instance {
         foreach ($grade['criteria'] as $id => $record) {
             $curscore += $this->get_controller()->get_definition()->rubric_criteria[$id]['levels'][$record['levelid']]['score'];
         }
-
-        $allowdecimals = $this->get_controller()->get_allow_grade_decimals();
-        $options = $this->get_controller()->get_options();
-
-        if ($options['lockzeropoints']) {
-            // Grade calculation method when 0-level is locked.
-            $grade = max($mingrade, $curscore / $scores['maxscore'] * $maxgrade);
-            return $allowdecimals ? $grade : round($grade, 0);
-        } else {
-            // Alternative grade calculation method.
-            $gradeoffset = ($curscore - $scores['minscore']) / ($scores['maxscore'] - $scores['minscore']) * ($maxgrade - $mingrade);
-            return ($allowdecimals ? $gradeoffset : round($gradeoffset, 0)) + $mingrade;
+        $gradeoffset = ($curscore-$scores['minscore'])/($scores['maxscore']-$scores['minscore'])*($maxgrade-$mingrade);
+        if ($this->get_controller()->get_allow_grade_decimals()) {
+            return $gradeoffset + $mingrade;
         }
+        return round($gradeoffset, 0) + $mingrade;
     }
 
     /**

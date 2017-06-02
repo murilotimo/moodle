@@ -53,7 +53,7 @@ class user_evidence extends persistent {
                 'type' => PARAM_TEXT
             ),
             'description' => array(
-                'type' => PARAM_CLEANHTML,
+                'type' => PARAM_RAW,
                 'default' => '',
             ),
             'descriptionformat' => array(
@@ -75,7 +75,7 @@ class user_evidence extends persistent {
      * @return bool
      */
     public function can_manage() {
-        return self::can_manage_user($this->get('userid'));
+        return self::can_manage_user($this->get_userid());
     }
 
     /**
@@ -84,7 +84,7 @@ class user_evidence extends persistent {
      * @return bool
      */
     public function can_read() {
-        return self::can_read_user($this->get('userid'));
+        return self::can_read_user($this->get_userid());
     }
 
     /**
@@ -93,21 +93,21 @@ class user_evidence extends persistent {
      * @return context
      */
     public function get_context() {
-        return context_user::instance($this->get('userid'));
+        return context_user::instance($this->get_userid());
     }
 
     /**
      * Get link competencies.
      */
     public function get_competencies() {
-        return user_evidence_competency::get_competencies_by_userevidenceid($this->get('id'));
+        return user_evidence_competency::get_competencies_by_userevidenceid($this->get_id());
     }
 
     /**
      * Get link user competencies.
      */
     public function get_user_competencies() {
-        return user_evidence_competency::get_user_competencies_by_userevidenceid($this->get('id'));
+        return user_evidence_competency::get_user_competencies_by_userevidenceid($this->get_id());
     }
 
     /**
@@ -116,7 +116,7 @@ class user_evidence extends persistent {
      * @return bool
      */
     public function user_has_plan() {
-        return plan::record_exists_select('userid = ?', array($this->get('userid')));
+        return plan::record_exists_select('userid = ?', array($this->get_userid()));
     }
 
     /**
@@ -126,7 +126,7 @@ class user_evidence extends persistent {
      */
     public function get_files() {
         $fs = get_file_storage();
-        $files = $fs->get_area_files($this->get_context()->id, 'core_competency', 'userevidence', $this->get('id'),
+        $files = $fs->get_area_files($this->get_context()->id, 'core_competency', 'userevidence', $this->get_id(),
             'filename', false);
         return $files;
     }
@@ -157,7 +157,7 @@ class user_evidence extends persistent {
         global $DB;
 
         // During create.
-        if (!$this->get('id')) {
+        if (!$this->get_id()) {
 
             // Check that the user exists. We do not need to do that on update because
             // the userid of an evidence should never change.

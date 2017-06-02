@@ -56,7 +56,7 @@ define(['jquery', 'core/notification', 'core/ajax', 'core/templates'], function(
      *
      * @private
      * @method _getAssignmentId
-     * @return {Integer} assignment id
+     * @return int assignment id
      */
     UserInfo.prototype._getAssignmentId = function() {
         return this._region.attr('data-assignmentid');

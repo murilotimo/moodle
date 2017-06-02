@@ -53,7 +53,7 @@ class template extends persistent {
             ),
             'description' => array(
                 'default' => '',
-                'type' => PARAM_CLEANHTML,
+                'type' => PARAM_RAW,
             ),
             'descriptionformat' => array(
                 'choices' => array(FORMAT_HTML, FORMAT_MOODLE, FORMAT_PLAIN, FORMAT_MARKDOWN),
@@ -93,8 +93,8 @@ class template extends persistent {
         $this->beforeupdate = null;
 
         // During update.
-        if ($this->get('id')) {
-            $this->beforeupdate = new self($this->get('id'));
+        if ($this->get_id()) {
+            $this->beforeupdate = new self($this->get_id());
         }
     }
 
@@ -142,7 +142,7 @@ class template extends persistent {
      * @return context The context
      */
     public function get_context() {
-        return context::instance_by_id($this->get('contextid'));
+        return context::instance_by_id($this->get_contextid());
     }
 
     /**
@@ -174,8 +174,8 @@ class template extends persistent {
     protected function validate_duedate($value) {
 
         // During update.
-        if ($this->get('id')) {
-            $before = $this->beforeupdate->get('duedate');
+        if ($this->get_id()) {
+            $before = $this->beforeupdate->get_duedate();
 
             // The value has not changed, then it's always OK.
             if ($before == $value) {
@@ -199,7 +199,7 @@ class template extends persistent {
      * @return boolean
      */
     public function has_plans() {
-        return plan::has_records_for_template($this->get('id'));
+        return plan::has_records_for_template($this->get_id());
     }
 
 }

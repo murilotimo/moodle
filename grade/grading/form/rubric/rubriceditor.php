@@ -232,30 +232,29 @@ class MoodleQuickForm_rubriceditor extends HTML_QuickForm_input {
                             'score' => 0,
                         );
                         foreach ($criterion['levels'] as $lastlevel) {
-                            if (isset($lastlevel['score'])) {
-                                $level['score'] = max($level['score'], ceil(unformat_float($lastlevel['score'])) + 1);
+                            if (isset($lastlevel['score']) && $level['score'] < $lastlevel['score'] + 1) {
+                                $level['score'] = $lastlevel['score'] + 1;
                             }
                         }
                         $this->nonjsbuttonpressed = true;
                     }
                     if (!array_key_exists('delete', $level)) {
-                        $score = unformat_float($level['score'], true);
                         if ($withvalidation) {
                             if (!strlen(trim($level['definition']))) {
                                 $errors['err_nodefinition'] = 1;
                                 $level['error_definition'] = true;
                             }
-                            if ($score === null || $score === false) {
+                            if (!preg_match('#^[\+]?\d*$#', trim($level['score'])) && !preg_match('#^[\+]?\d*[\.,]\d+$#', trim($level['score']))) {
                                 $errors['err_scoreformat'] = 1;
                                 $level['error_score'] = true;
                             }
                         }
                         $levels[$levelid] = $level;
-                        if ($minscore === null || $score < $minscore) {
-                            $minscore = $score;
+                        if ($minscore === null || (float)$level['score'] < $minscore) {
+                            $minscore = (float)$level['score'];
                         }
-                        if ($maxscore === null || $score > $maxscore) {
-                            $maxscore = $score;
+                        if ($maxscore === null || (float)$level['score'] > $maxscore) {
+                            $maxscore = (float)$level['score'];
                         }
                     } else {
                         $this->nonjsbuttonpressed = true;
@@ -314,10 +313,8 @@ class MoodleQuickForm_rubriceditor extends HTML_QuickForm_input {
 
         // create validation error string (if needed)
         if ($withvalidation) {
-            if (!$return['options']['lockzeropoints']) {
-                if ($overallminscore == $overallmaxscore) {
-                    $errors['err_novariations'] = 1;
-                }
+            if ($overallminscore == $overallmaxscore) {
+                $errors['err_novariations'] = 1;
             }
             if (count($errors)) {
                 $rv = array();

@@ -54,17 +54,17 @@ class competency_user_competency_rated_in_plan extends base {
      * @return self
      */
     public static function create_from_user_competency(user_competency $usercompetency, $planid) {
-        if (!$usercompetency->get('id')) {
+        if (!$usercompetency->get_id()) {
             throw new \coding_exception('The user competency ID must be set.');
         }
 
         $params = array(
             'contextid' => $usercompetency->get_context()->id,
-            'objectid' => $usercompetency->get('id'),
-            'relateduserid' => $usercompetency->get('userid'),
+            'objectid' => $usercompetency->get_id(),
+            'relateduserid' => $usercompetency->get_userid(),
             'other' => array(
-                'competencyid' => $usercompetency->get('competencyid'),
-                'grade' => $usercompetency->get('grade'),
+                'competencyid' => $usercompetency->get_competencyid(),
+                'grade' => $usercompetency->get_grade(),
                 'planid' => $planid
             )
         );

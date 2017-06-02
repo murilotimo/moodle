@@ -621,6 +621,9 @@ class qformat_default {
         $question->questiontextformat = FORMAT_MOODLE;
         $question->generalfeedback = '';
         $question->generalfeedbackformat = FORMAT_MOODLE;
+        $question->correctfeedback = '';
+        $question->partiallycorrectfeedback = '';
+        $question->incorrectfeedback = '';
         $question->answernumbering = 'abc';
         $question->penalty = 0.3333333;
         $question->length = 1;
@@ -629,8 +632,6 @@ class qformat_default {
         // to know where the data came from
         $question->export_process = true;
         $question->import_process = true;
-
-        $this->add_blank_combined_feedback($question);
 
         return $question;
     }
@@ -672,21 +673,15 @@ class qformat_default {
      * @return object question
      */
     protected function add_blank_combined_feedback($question) {
-        $question->correctfeedback = [
-            'text' => '',
-            'format' => $question->questiontextformat,
-            'files' => []
-        ];
-        $question->partiallycorrectfeedback = [
-            'text' => '',
-            'format' => $question->questiontextformat,
-            'files' => []
-        ];
-        $question->incorrectfeedback = [
-            'text' => '',
-            'format' => $question->questiontextformat,
-            'files' => []
-        ];
+        $question->correctfeedback['text'] = '';
+        $question->correctfeedback['format'] = $question->questiontextformat;
+        $question->correctfeedback['files'] = array();
+        $question->partiallycorrectfeedback['text'] = '';
+        $question->partiallycorrectfeedback['format'] = $question->questiontextformat;
+        $question->partiallycorrectfeedback['files'] = array();
+        $question->incorrectfeedback['text'] = '';
+        $question->incorrectfeedback['format'] = $question->questiontextformat;
+        $question->incorrectfeedback['files'] = array();
         return $question;
     }
 
