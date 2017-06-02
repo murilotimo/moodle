@@ -186,12 +186,18 @@ class schema {
             $params = array(
                 'add-field' => array(
                     'name' => $fieldname,
-                    'type' => ($data['type'] === 'text' ? 'text_general' : $data['type']),
+                    'type' => ($data['type'] === 'text' ? 'text_pt' : $data['type']),
                     'stored' => $data['stored'],
                     'multiValued' => false,
-                    'indexed' => $data['indexed']
+                    'indexed' => $data['indexed'],               	
                 )
             );
+            
+            //if ($data['analyzer']){
+            //	$params['add-field'] += ['indexAnalyzer'=>$data['analyzer']] ;
+            //};
+            $json = json_encode($params);
+            	
             $results = $this->curl->post($url, json_encode($params));
 
             // We only validate if we are interested on it.
@@ -253,7 +259,7 @@ class schema {
                             get_string('schemafieldautocreated', 'search_solr', $fieldname));
 
                     } else if (($results->field->type !== $data['type'] &&
-                                ($data['type'] !== 'text' || $results->field->type !== 'text_general')) ||
+                                ($data['type'] !== 'text' || $results->field->type !== 'text_pt')) ||
                                 $results->field->multiValued !== false ||
                                 $results->field->indexed !== $data['indexed'] ||
                                 $results->field->stored !== $data['stored']) {
