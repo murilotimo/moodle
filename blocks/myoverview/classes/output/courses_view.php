@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use renderable;
 use renderer_base;
+use stdClass;
 use templatable;
 use core_course\external\course_summary_exporter;
 
@@ -125,6 +126,43 @@ class courses_view implements renderable, templatable {
                 $coursesbystatus['inprogress']++;
             }
         }
+        
+        // é aqui que pode começar a bagunça para trazer os códigos do SITDE
+        
+        $cursosSITDE = [0];
+        $cursos = [];
+        
+        foreach ($cursosSITDE as $curso) {
+            
+            $curso = new stdClass();
+            
+            $curso->enddate = "0"	;
+            $curso->fullname = "Curso do SITDE fullname"	;
+            $curso->fullnamedisplay = "Curso do SITDE fullnamedisplay "	;
+            $curso->hasprogress = true	;
+            $curso->id = 5000 . 2	;
+            $curso->idnumber = ""	;
+            $curso->progress = 50	;
+            $curso->shortname = "SITDE"	;
+            $curso->startdate = "1502852400"	;
+            $curso->summary = ""	;
+            $curso->summaryformat = "1"	;
+            $curso->viewurl = "http://localhost/moodle/local/teste.php"	;
+            $curso->visible = true	;
+            
+            $cursos[$curso->id] = $curso;
+            
+            // Courses still in progress. Either their end date is not set, or the end date is not yet past the current date.
+            $inprogresspages = floor($coursesbystatus['inprogress'] / $this::COURSES_PER_PAGE);
+            
+            $coursesview['inprogress']['pages'][$inprogresspages]['courses'][] = $curso;
+            $coursesview['inprogress']['pages'][$inprogresspages]['active'] = ($inprogresspages == 0 ? true : false);
+            $coursesview['inprogress']['pages'][$inprogresspages]['page'] = $inprogresspages + 1;
+            $coursesview['inprogress']['haspages'] = true;
+            $coursesbystatus['inprogress']++;
+            
+            
+        } ;        
 
         // Build courses view paging bar structure.
         foreach ($coursesbystatus as $status => $total) {
