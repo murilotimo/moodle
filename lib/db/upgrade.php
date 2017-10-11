@@ -84,7 +84,8 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $oldversion
  * @return bool always true
  */
-function xmldb_main_upgrade($oldversion) {
+function xmldb_main_upgrade($oldversion)
+{
     global $CFG, $DB;
 
     require_once($CFG->libdir.'/db/upgradelib.php'); // Core Upgrade-related functions.
@@ -151,8 +152,11 @@ function xmldb_main_upgrade($oldversion) {
 
     if ($oldversion < 2016011300.02) {
         // Create a default tag collection if not exists and update the field tag.tagcollid to point to it.
-        if (!$tcid = $DB->get_field_sql('SELECT id FROM {tag_coll} ORDER BY isdefault DESC, sortorder, id', null,
-                IGNORE_MULTIPLE)) {
+        if (!$tcid = $DB->get_field_sql(
+            'SELECT id FROM {tag_coll} ORDER BY isdefault DESC, sortorder, id',
+            null,
+                IGNORE_MULTIPLE
+        )) {
             $tcid = $DB->insert_record('tag_coll', array('isdefault' => 1, 'sortorder' => 0));
         }
         $DB->execute('UPDATE {tag} SET tagcollid = ? WHERE tagcollid IS NULL', array($tcid));
@@ -214,8 +218,11 @@ function xmldb_main_upgrade($oldversion) {
 
         // Define index itemtype-itemid-tagid-tiuserid (unique) to be dropped form tag_instance.
         $table = new xmldb_table('tag_instance');
-        $index = new xmldb_index('itemtype-itemid-tagid-tiuserid', XMLDB_INDEX_UNIQUE,
-                array('itemtype', 'itemid', 'tagid', 'tiuserid'));
+        $index = new xmldb_index(
+            'itemtype-itemid-tagid-tiuserid',
+            XMLDB_INDEX_UNIQUE,
+                array('itemtype', 'itemid', 'tagid', 'tiuserid')
+        );
 
         // Conditionally launch drop index itemtype-itemid-tagid-tiuserid.
         if ($dbman->index_exists($table, $index)) {
@@ -227,7 +234,6 @@ function xmldb_main_upgrade($oldversion) {
     }
 
     if ($oldversion < 2016011300.05) {
-
         $DB->execute("UPDATE {tag_instance} SET component = ? WHERE component IS NULL", array(''));
 
         // Changing nullability of field component on table tag_instance to not null.
@@ -307,15 +313,15 @@ function xmldb_main_upgrade($oldversion) {
             // Calculate and set new lookahead value.
             if ($userpref->value > 90) {
                 $newvalue = 120;
-            } else if ($userpref->value > 60 and $userpref->value < 90) {
+            } elseif ($userpref->value > 60 and $userpref->value < 90) {
                 $newvalue = 90;
-            } else if ($userpref->value > 30 and $userpref->value < 60) {
+            } elseif ($userpref->value > 30 and $userpref->value < 60) {
                 $newvalue = 60;
-            } else if ($userpref->value > 21 and $userpref->value < 30) {
+            } elseif ($userpref->value > 21 and $userpref->value < 30) {
                 $newvalue = 30;
-            } else if ($userpref->value > 14 and $userpref->value < 21) {
+            } elseif ($userpref->value > 14 and $userpref->value < 21) {
                 $newvalue = 21;
-            } else if ($userpref->value > 7 and $userpref->value < 14) {
+            } elseif ($userpref->value > 7 and $userpref->value < 14) {
                 $newvalue = 14;
             } else {
                 $newvalue = $userpref->value;
@@ -386,8 +392,10 @@ function xmldb_main_upgrade($oldversion) {
         }
 
         // By default set user area to hide standard tags. 2 = core_tag_tag::HIDE_STANDARD (can not use constant here).
-        $DB->execute("UPDATE {tag_area} SET showstandard = ? WHERE itemtype = ? AND component = ?",
-            array(2, 'user', 'core'));
+        $DB->execute(
+            "UPDATE {tag_area} SET showstandard = ? WHERE itemtype = ? AND component = ?",
+            array(2, 'user', 'core')
+        );
 
         // Changing precision of field enabled on table tag_area to (1).
         $table = new xmldb_table('tag_area');
@@ -1120,7 +1128,6 @@ function xmldb_main_upgrade($oldversion) {
 
         // Don't touch customised scheduling.
         if ($stattask && !$stattask->customised) {
-
             $nextruntime = mktime($hour, $minute, 0, date('m'), date('d'), date('Y'));
             if ($nextruntime < $stattask->lastruntime) {
                 // Add 24 hours to the next run time.
@@ -1350,7 +1357,6 @@ function xmldb_main_upgrade($oldversion) {
     }
 
     if ($oldversion < 2016110500.00) {
-
         $oldplayers = [
             'vimeo' => null,
             'mp3' => ['.mp3'],
@@ -1933,8 +1939,16 @@ function xmldb_main_upgrade($oldversion) {
 
         // Define field timemodified to be added to block_instances.
         $table = new xmldb_table('block_instances');
-        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, null,
-                null, null, 'configdata');
+        $field = new xmldb_field(
+            'timemodified',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+                null,
+            null,
+            'configdata'
+        );
 
         // Conditionally launch add field timemodified.
         if (!$dbman->field_exists($table, $field)) {
@@ -1944,8 +1958,16 @@ function xmldb_main_upgrade($oldversion) {
             $DB->set_field('block_instances', 'timemodified', time());
 
             // Changing nullability of field timemodified on table block_instances to not null.
-            $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL,
-                    null, null, 'configdata');
+            $field = new xmldb_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                    null,
+                null,
+                'configdata'
+            );
 
             // Launch change of nullability for field timemodified.
             $dbman->change_field_notnull($table, $field);
@@ -1960,8 +1982,16 @@ function xmldb_main_upgrade($oldversion) {
         }
 
         // Define field timecreated to be added to block_instances.
-        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, null,
-                null, null, 'configdata');
+        $field = new xmldb_field(
+            'timecreated',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+                null,
+            null,
+            'configdata'
+        );
 
         // Conditionally launch add field timecreated.
         if (!$dbman->field_exists($table, $field)) {
@@ -1971,8 +2001,16 @@ function xmldb_main_upgrade($oldversion) {
             $DB->set_field('block_instances', 'timecreated', time());
 
             // Changing nullability of field timecreated on table block_instances to not null.
-            $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL,
-                    null, null, 'configdata');
+            $field = new xmldb_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                    null,
+                null,
+                'configdata'
+            );
 
             // Launch change of nullability for field timecreated.
             $dbman->change_field_notnull($table, $field);
@@ -1982,7 +2020,7 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2017071001.00);
     }
 
-    if ($oldversion < 2017071100.00 ) {
+    if ($oldversion < 2017071100.00) {
         // Clean old upgrade setting not used anymore.
         unset_config('upgrade_minmaxgradestepignored');
         upgrade_main_savepoint(true, 2017071100.00);
@@ -2084,8 +2122,11 @@ function xmldb_main_upgrade($oldversion) {
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
 
         // Adding indexes to table analytics_train_samples.
-        $table->add_index('modelidandanalysableidandtimesplitting', XMLDB_INDEX_NOTUNIQUE,
-            array('modelid', 'analysableid', 'timesplitting'));
+        $table->add_index(
+            'modelidandanalysableidandtimesplitting',
+            XMLDB_INDEX_NOTUNIQUE,
+            array('modelid', 'analysableid', 'timesplitting')
+        );
 
         // Conditionally launch create table for analytics_train_samples.
         if (!$dbman->table_exists($table)) {
@@ -2107,8 +2148,11 @@ function xmldb_main_upgrade($oldversion) {
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
 
         // Adding indexes to table analytics_predict_ranges.
-        $table->add_index('modelidandanalysableidandtimesplitting', XMLDB_INDEX_NOTUNIQUE,
-            array('modelid', 'analysableid', 'timesplitting'));
+        $table->add_index(
+            'modelidandanalysableidandtimesplitting',
+            XMLDB_INDEX_NOTUNIQUE,
+            array('modelid', 'analysableid', 'timesplitting')
+        );
 
         // Conditionally launch create table for analytics_predict_ranges.
         if (!$dbman->table_exists($table)) {
@@ -2236,13 +2280,17 @@ function xmldb_main_upgrade($oldversion) {
         $cleannewhuburl = preg_replace('/[^A-Za-z0-9_-]/i', '', $newhuburl);
 
         // Update existing registration.
-        $DB->execute("UPDATE {registration_hubs} SET hubname = ?, huburl = ? WHERE huburl = ?",
-            ['Moodle.net', $newhuburl, $oldhuburl]);
+        $DB->execute(
+            "UPDATE {registration_hubs} SET hubname = ?, huburl = ? WHERE huburl = ?",
+            ['Moodle.net', $newhuburl, $oldhuburl]
+        );
 
         // Update settings of existing registration.
         $sqlnamelike = $DB->sql_like('name', '?');
-        $entries = $DB->get_records_sql("SELECT * FROM {config_plugins} where plugin=? and " . $sqlnamelike,
-            ['hub', '%' . $DB->sql_like_escape('_' . $cleanoldhuburl)]);
+        $entries = $DB->get_records_sql(
+            "SELECT * FROM {config_plugins} where plugin=? and " . $sqlnamelike,
+            ['hub', '%' . $DB->sql_like_escape('_' . $cleanoldhuburl)]
+        );
         foreach ($entries as $entry) {
             $newname = substr($entry->name, 0, -strlen($cleanoldhuburl)) . $cleannewhuburl;
             try {
@@ -2293,16 +2341,22 @@ function xmldb_main_upgrade($oldversion) {
 
         $table = new xmldb_table('analytics_predict_samples');
 
-        $index = new xmldb_index('modelidandanalysableidandtimesplitting', XMLDB_INDEX_NOTUNIQUE,
-            array('modelid', 'analysableid', 'timesplitting'));
+        $index = new xmldb_index(
+            'modelidandanalysableidandtimesplitting',
+            XMLDB_INDEX_NOTUNIQUE,
+            array('modelid', 'analysableid', 'timesplitting')
+        );
 
         // Conditionally launch drop index.
         if ($dbman->index_exists($table, $index)) {
             $dbman->drop_index($table, $index);
         }
 
-        $index = new xmldb_index('modelidandanalysableidandtimesplittingandrangeindex', XMLDB_INDEX_NOTUNIQUE,
-            array('modelid', 'analysableid', 'timesplitting', 'rangeindex'));
+        $index = new xmldb_index(
+            'modelidandanalysableidandtimesplittingandrangeindex',
+            XMLDB_INDEX_NOTUNIQUE,
+            array('modelid', 'analysableid', 'timesplitting', 'rangeindex')
+        );
 
         // Conditionally launch add index.
         if (!$dbman->index_exists($table, $index)) {
@@ -2459,8 +2513,11 @@ function xmldb_main_upgrade($oldversion) {
         $table->add_key('userid', XMLDB_KEY_FOREIGN, array('userid'), 'user', array('id'));
 
         // Adding indexes to table analytics_prediction_actions.
-        $table->add_index('predictionidanduseridandactionname', XMLDB_INDEX_NOTUNIQUE,
-            array('predictionid', 'userid', 'actionname'));
+        $table->add_index(
+            'predictionidanduseridandactionname',
+            XMLDB_INDEX_NOTUNIQUE,
+            array('predictionid', 'userid', 'actionname')
+        );
 
         // Conditionally launch create table for analytics_prediction_actions.
         if (!$dbman->table_exists($table)) {
@@ -2514,7 +2571,6 @@ function xmldb_main_upgrade($oldversion) {
     }
 
     if ($oldversion < 2017092202.00) {
-
         if (!file_exists($CFG->dirroot . '/blocks/messages/block_messages.php')) {
 
             // Delete instances.
@@ -2559,8 +2615,10 @@ function xmldb_main_upgrade($oldversion) {
             'site_country_httpsmoodlenet' => 'site_countrycode_httpsmoodlenet'];
         foreach ($renames as $oldparamname => $newparamname) {
             try {
-                $DB->execute("UPDATE {config_plugins} SET name = ? WHERE name = ? AND plugin = ?",
-                    [$newparamname, $oldparamname, 'hub']);
+                $DB->execute(
+                    "UPDATE {config_plugins} SET name = ? WHERE name = ? AND plugin = ?",
+                    [$newparamname, $oldparamname, 'hub']
+                );
             } catch (dml_exception $e) {
                 // Exception can happen if the config value with the new name already exists, ignore it and move on.
             }
@@ -2600,6 +2658,22 @@ function xmldb_main_upgrade($oldversion) {
         // Main savepoint reached.
         upgrade_main_savepoint(true, 2017092900.00);
     }
+
+    if ($oldversion < 2017100600.01) {
+
+        // Define field requireconfirmation to be added to oauth2_issuer.
+        $table = new xmldb_table('scale');
+        $field = new xmldb_field('format', XMLDB_TYPE_TEXT, NULL, null, NULL, NULL, NULL, NULL);
+
+        // Conditionally launch add field requireconfirmation.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2017100600.01);
+    }
+
 
     return true;
 }
