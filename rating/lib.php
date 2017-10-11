@@ -34,6 +34,10 @@ define ('RATING_AGGREGATE_SUM', 5);
 
 define ('RATING_DEFAULT_SCALE', 5);
 
+define('RATING_FORMAT_SELECT', 0);
+define('RATING_FORMAT_BUTTONS', 1);
+
+
 /**
  * The rating class represents a single rating by a single user
  *
@@ -713,6 +717,7 @@ class rating_manager {
             $scale->scaleitems = array();
             $scale->isnumeric = true;
             $scale->max = $scaleid;
+            $scale->format = 0;
 
             if ($scaleid < 0) {
                 // It is a proper scale (not numeric).
@@ -730,6 +735,7 @@ class rating_manager {
                     $scale->name = $scalerecord->name;
                     $scale->courseid = $scalerecord->courseid;
                     $scale->max = count($scale->scaleitems);
+                    $scale->format = $scalerecord->format;
                 }
             } else {
                 // Generate an array of values for numeric scales.
