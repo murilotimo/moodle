@@ -2271,10 +2271,25 @@ class core_renderer extends renderer_base {
             }
             $ratinghtml = $formstart.$ratinghtml;
 
-            $scalearray = array(RATING_UNSET_RATING => $strrate.'...') + $rating->settings->scale->scaleitems;
             $scaleattrs = array('class'=>'postratingmenu ratinginput','id'=>'menurating'.$rating->itemid);
             $ratinghtml .= html_writer::label($rating->rating, 'menurating'.$rating->itemid, false, array('class' => 'accesshide'));
-            $ratinghtml .= html_writer::select($scalearray, 'rating', $rating->rating, false, $scaleattrs);
+            
+            if ($rating->settings->scale->format == RATING_FORMAT_BUTTONS ) {
+                $scaleicons = $rating->settings->scale->scaleicons;
+                $scalearray = $rating->settings->scale->scaleitems;
+                foreach ($scalearray as $scaleid => $value) {
+                    $ratinghtml .= html_writer::start_tag('button', ['class' => 'btn btn-secondary']);
+                    $attr = [
+                        'class' => 'fa ' . $scaleicons[$scaleid]
+                    ];
+                    $ratinghtml .= html_writer::tag('i', null, $attr);
+                    $ratinghtml .= $value;
+                    $ratinghtml .= html_writer::end_tag('button');
+                }
+            }else{
+                $scalearray = array(RATING_UNSET_RATING => $strrate.'...') + $rating->settings->scale->scaleitems;
+                $ratinghtml .= html_writer::select($scalearray, 'rating', $rating->rating, false, $scaleattrs);
+            }
 
             //output submit button
             $ratinghtml .= html_writer::start_tag('span', array('class'=>"ratingsubmit"));

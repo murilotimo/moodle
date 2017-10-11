@@ -1099,6 +1099,8 @@ class grade_report_grader extends grade_report {
                         $scaleopt = array();
                         $i = 0;
                         foreach ($scales as $scaleoption) {
+                            var_dump($scaleoption);
+                            $scaleoption = strstr($scaleoption, '| ') ? strstr($scaleoption, '|') : $scaleoption;
                             $i++;
                             $scaleopt[$i] = $scaleoption;
                         }

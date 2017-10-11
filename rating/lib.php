@@ -715,6 +715,7 @@ class rating_manager {
             $scale->name = null;
             $scale->courseid = null;
             $scale->scaleitems = array();
+            $scale->scaleicons = array();
             $scale->isnumeric = true;
             $scale->max = $scaleid;
             $scale->format = 0;
@@ -726,10 +727,20 @@ class rating_manager {
                     // We need to generate an array with string keys starting at 1.
                     $scalearray = explode(',', $scalerecord->scale);
                     $c = count($scalearray);
-                    for ($i = 0; $i < $c; $i++) {
+                    if ($scalerecord->format == RATING_FORMAT_BUTTONS) {
+                        for ($i = 0; $i < $c; $i++) {
+                        // Treat index as a string to allow sorting without changing the value.
+                        $item = explode('|', $scalearray[$i]);
+                        $scale->scaleicons[(string)($i + 1)] = $item[0];
+                        $scale->scaleitems[(string)($i + 1)] = $item[1];
+                        }; 
+                    } else {
+                        for ($i = 0; $i < $c; $i++) {
                         // Treat index as a string to allow sorting without changing the value.
                         $scale->scaleitems[(string)($i + 1)] = $scalearray[$i];
+                        };
                     }
+                    
                     krsort($scale->scaleitems); // Have the highest grade scale item appear first.
                     $scale->isnumeric = false;
                     $scale->name = $scalerecord->name;

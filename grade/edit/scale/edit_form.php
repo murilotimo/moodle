@@ -45,6 +45,13 @@ class edit_scale_form extends moodleform {
 
         $mform->addElement('static', 'used', get_string('used'));
 
+        $formats = [
+            0 => 'select',
+            1 => 'buttons'
+        ];
+        $mform->addElement('select', 'format', get_string('format'), $formats);
+        $mform->setType('format', PARAM_INT);
+
         $mform->addElement('textarea', 'scale', get_string('scale'), array('cols'=>50, 'rows'=>2));
         $mform->addHelpButton('scale', 'scale');
         $mform->addRule('scale', get_string('required'), 'required', null, 'client');
@@ -160,5 +167,3 @@ class edit_scale_form extends moodleform {
         return $errors;
     }
 }
-
-
