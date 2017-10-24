@@ -2277,15 +2277,34 @@ class core_renderer extends renderer_base {
             if ($rating->settings->scale->format == RATING_FORMAT_BUTTONS ) {
                 $scaleicons = $rating->settings->scale->scaleicons;
                 $scalearray = $rating->settings->scale->scaleitems;
+
+                $ratinghtml .= html_writer::start_tag('div',["class"=>"btn-group", "data-toggle"=>"buttons"]);
+
                 foreach ($scalearray as $scaleid => $value) {
-                    $ratinghtml .= html_writer::start_tag('button', ['class' => 'btn btn-secondary']);
-                    $attr = [
-                        'class' => 'fa ' . $scaleicons[$scaleid]
+                    // precisamos verificar qual o botão esta selecionado, para adicionar a classe active e o atributo checked pro ratio:
+                    $labelattr = [];
+                    // mas vamos começar somente adicionando os labels como botões
+                    $labelattr['class'] = "btn btn-secondary btnratinginput";
+                    $ratinghtml .= html_writer::start_tag("label", $labelattr);
+                    $inputttr = [
+                        "type" => "radio",
+                        "name"  => "rating",
+                        "id" =>"rating".$scaleid,
+                        "value" => $scaleid,
+                        "class" => "ratinginput" 
                     ];
-                    $ratinghtml .= html_writer::tag('i', null, $attr);
+                    $ratinghtml .= html_writer::start_tag("input", $inputttr);
+                    $attr = [
+                        "class" => "fa " . $scaleicons[$scaleid]
+                    ];
+                    $ratinghtml .= html_writer::tag("i", null, $attr);
                     $ratinghtml .= $value;
-                    $ratinghtml .= html_writer::end_tag('button');
-                }
+                    $ratinghtml .= html_writer::end_tag("input");
+                    $ratinghtml .= html_writer::end_tag("label");
+                };
+
+                $ratinghtml .= html_writer::end_tag("div");
+
             }else{
                 $scalearray = array(RATING_UNSET_RATING => $strrate.'...') + $rating->settings->scale->scaleitems;
                 $ratinghtml .= html_writer::select($scalearray, 'rating', $rating->rating, false, $scaleattrs);
