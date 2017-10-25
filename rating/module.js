@@ -18,6 +18,12 @@ M.core_rating = {
         var thedata = [];
 
         var inputssize = theinputs.size();
+
+        // Add a JavaScript loading icon.
+        var spinner = M.util.add_spinner(Y, e.target.ancestor('.ratingform'));
+        spinner.removeClass('iconsmall');
+
+
         for (var i = 0; i < inputssize; i++) {
             if (theinputs.item(i).get("name") != "returnurl") { // Dont include return url for ajax requests.
                 if (theinputs.item(i).get("type") == "radio"){
@@ -35,6 +41,10 @@ M.core_rating = {
         var cfg = {
             method: 'POST',
             on: {
+                start: function() {
+                    // Display the JS loading icon.
+                    spinner.show();
+                },
                 complete: function(tid, outcome, args) {
                     try {
                         if (!outcome) {
@@ -67,6 +77,9 @@ M.core_rating = {
                         alert(e.message + " " + outcome.responseText);
                     }
                     return false;
+                },
+                end: function(){
+                    spinner.hide();
                 }
             },
             arguments: {
