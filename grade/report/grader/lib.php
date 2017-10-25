@@ -1099,8 +1099,8 @@ class grade_report_grader extends grade_report {
                         $scaleopt = array();
                         $i = 0;
                         foreach ($scales as $scaleoption) {
-                            var_dump($scaleoption);
-                            $scaleoption = strstr($scaleoption, '| ') ? strstr($scaleoption, '|') : $scaleoption;
+                            //MDL-45394 show options without icons
+                            $scaleoption = strstr($scaleoption, '|') ? preg_replace('(\\|)','',strstr($scaleoption, '|')) : $scaleoption;
                             $i++;
                             $scaleopt[$i] = $scaleoption;
                         }
@@ -1211,6 +1211,7 @@ class grade_report_grader extends grade_report {
             $jsarguments['cfg']['ajaxenabled'] = true;
             $jsarguments['cfg']['scales'] = array();
             foreach ($jsscales as $scale) {
+                $scale->scale = strstr($scale, '|') ? preg_replace('(\\|)','',strstr($scale, '|')) : $scale;
                 // Trim the scale values, as they may have a space that is ommitted from values later.
                 $jsarguments['cfg']['scales'][$scale->id] = array_map('trim', explode(',', $scale->scale));
             }
