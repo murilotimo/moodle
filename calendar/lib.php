@@ -1319,77 +1319,6 @@ function calendar_get_starting_weekday() {
 }
 
 /**
- * Gets the calendar upcoming event.
- *
- * @param array $courses array of courses
- * @param array|int|bool $groups array of groups, group id or boolean for all/no group events
- * @param array|int|bool $users array of users, user id or boolean for all/no user events
- * @param int $daysinfuture number of days in the future we 'll look
- * @param int $maxevents maximum number of events
- * @param int $fromtime start time
- * @return array $output array of upcoming events
- */
-function calendar_get_upcoming($courses, $groups, $users, $daysinfuture, $maxevents, $fromtime=0) {
-    global $COURSE;
-
-    $display = new \stdClass;
-    $display->range = $daysinfuture; // How many days in the future we 'll look.
-    $display->maxevents = $maxevents;
-
-    $output = array();
-
-    $processed = 0;
-    $now = time(); // We 'll need this later.
-    $usermidnighttoday = usergetmidnight($now);
-
-    if ($fromtime) {
-        $display->tstart = $fromtime;
-    } else {
-        $display->tstart = $usermidnighttoday;
-    }
-
-    // This works correctly with respect to the user's DST, but it is accurate
-    // only because $fromtime is always the exact midnight of some day!
-    $display->tend = usergetmidnight($display->tstart + DAYSECS * $display->range + 3 * HOURSECS) - 1;
-
-    // Get the events matching our criteria.
-    $events = calendar_get_legacy_events($display->tstart, $display->tend, $users, $groups, $courses);
-
-    // This is either a genius idea or an idiot idea: in order to not complicate things, we use this rule: if, after
-    // possibly removing SITEID from $courses, there is only one course left, then clicking on a day in the month
-    // will also set the $SESSION->cal_courses_shown variable to that one course. Otherwise, we 'd need to add extra
-    // arguments to this function.
-    $hrefparams = array();
-    if (!empty($courses)) {
-        $courses = array_diff($courses, array(SITEID));
-        if (count($courses) == 1) {
-            $hrefparams['course'] = reset($courses);
-        }
-    }
-
-    if ($events !== false) {
-        foreach ($events as $event) {
-            if (!empty($event->modulename)) {
-                $instances = get_fast_modinfo($event->courseid)->get_instances_of($event->modulename);
-                if (empty($instances[$event->instance]->uservisible)) {
-                    continue;
-                }
-            }
-
-            if ($processed >= $display->maxevents) {
-                break;
-            }
-
-            $event->time = calendar_format_event_time($event, $now, $hrefparams);
-            $output[] = $event;
-            $processed++;
-        }
-    }
-
-    return $output;
-}
-
-/**
  * Get a HTML link to a course.
  *
  * @param int|stdClass $course the course id or course object
@@ -2478,19 +2407,11 @@ function calendar_get_all_allowed_types() {
         calendar_get_allowed_types($allowed, $course, $coursegroups);
 
         if (!empty($allowed->courses)) {
-            if (!isset($types['course'])) {
-                $types['course'] = [$course];
-            } else {
-                $types['course'][] = $course;
-            }
+            $types['course'][$course->id] = $course;
         }
 
         if (!empty($allowed->groups)) {
-            if (!isset($types['groupcourses'])) {
-                $types['groupcourses'] = [$course];
-            } else {
-                $types['groupcourses'][] = $course;
-            }
+            $types['groupcourses'][$course->id] = $course;
 
             if (!isset($types['group'])) {
                 $types['group'] = array_values($allowed->groups);
@@ -2516,7 +2437,7 @@ function calendar_user_can_add_event($course) {
 
     calendar_get_allowed_types($allowed, $course);
 
-    return (bool)($allowed->user || $allowed->groups || $allowed->courses || $allowed->category || $allowed->site);
+    return (bool)($allowed->user || $allowed->groups || $allowed->courses || $allowed->categories || $allowed->site);
 }
 
 /**
@@ -3142,31 +3063,50 @@ function calendar_get_view(\calendar_information $calendar, $view, $includenavig
     $type = \core_calendar\type_factory::get_calendar_instance();
 
     // Calculate the bounds of the month.
-    $date = $type->timestamp_to_date_array($calendar->time);
+    $calendardate = $type->timestamp_to_date_array($calendar->time);
+
+    $date = new \DateTime('now', core_date::get_user_timezone_object(99));
 
     if ($view === 'day') {
-        $tstart = $type->convert_to_timestamp($date['year'], $date['mon'], $date['mday']);
-        $tend = $tstart + DAYSECS - 1;
-    } else if ($view === 'upcoming') {
+        $tstart = $type->convert_to_timestamp($calendardate['year'], $calendardate['mon'], $calendardate['mday']);
+        $date->setTimestamp($tstart);
+        $date->modify('+1 day');
+    } else if ($view === 'upcoming' || $view === 'upcoming_mini') {
+        // Number of days in the future that will be used to fetch events.
         if (isset($CFG->calendar_lookahead)) {
             $defaultlookahead = intval($CFG->calendar_lookahead);
         } else {
             $defaultlookahead = CALENDAR_DEFAULT_UPCOMING_LOOKAHEAD;
         }
+        $lookahead = get_user_preferences('calendar_lookahead', $defaultlookahead);
 
-        $tstart = $type->convert_to_timestamp($date['year'], $date['mon'], $date['mday'], $date['hours']);
-        $tend = usergetmidnight($tstart + DAYSECS * $defaultlookahead + 3 * HOURSECS) - 1;
+        // Maximum number of events to be displayed on upcoming view.
+        $defaultmaxevents = CALENDAR_DEFAULT_UPCOMING_MAXEVENTS;
+        if (isset($CFG->calendar_maxevents)) {
+            $defaultmaxevents = intval($CFG->calendar_maxevents);
+        }
+        $maxevents = get_user_preferences('calendar_maxevents', $defaultmaxevents);
+
+        $tstart = $type->convert_to_timestamp($calendardate['year'], $calendardate['mon'], $calendardate['mday'],
+                $calendardate['hours']);
+        $date->setTimestamp($tstart);
+        $date->modify('+' . $lookahead . ' days');
     } else {
-        $tstart = $type->convert_to_timestamp($date['year'], $date['mon'], 1);
-        $monthdays = $type->get_num_days_in_month($date['year'], $date['mon']);
-        $tend = $tstart + ($monthdays * DAYSECS) - 1;
-        $selectortitle = get_string('detailedmonthviewfor', 'calendar');
+        $tstart = $type->convert_to_timestamp($calendardate['year'], $calendardate['mon'], 1);
+        $monthdays = $type->get_num_days_in_month($calendardate['year'], $calendardate['mon']);
+        $date->setTimestamp($tstart);
+        $date->modify('+' . $monthdays . ' days');
+
         if ($view === 'mini' || $view === 'minithree') {
             $template = 'core_calendar/calendar_mini';
         } else {
             $template = 'core_calendar/calendar_month';
         }
     }
+
+    // We need to extract 1 second to ensure that we don't get into the next day.
+    $date->modify('-1 second');
+    $tend = $date->getTimestamp();
 
     list($userparam, $groupparam, $courseparam, $categoryparam) = array_map(function($param) {
         // If parameter is true, return null.
@@ -3188,6 +3128,14 @@ function calendar_get_view(\calendar_information $calendar, $view, $includenavig
         return $param;
     }, [$calendar->users, $calendar->groups, $calendar->courses, $calendar->categories]);
 
+    // We need to make sure user calendar preferences are respected.
+    // If max upcoming events is not set then use default value of 40 events.
+    if (isset($maxevents)) {
+        $limit = $maxevents;
+    } else {
+        $limit = 40;
+    }
+
     $events = \core_calendar\local\api::get_events(
         $tstart,
         $tend,
@@ -3195,7 +3143,7 @@ function calendar_get_view(\calendar_information $calendar, $view, $includenavig
         null,
         null,
         null,
-        40,
+        $limit,
         null,
         $userparam,
         $groupparam,
@@ -3234,10 +3182,15 @@ function calendar_get_view(\calendar_information $calendar, $view, $includenavig
         $day = new \core_calendar\external\calendar_day_exporter($calendar, $related);
         $data = $day->export($renderer);
         $template = 'core_calendar/calendar_day';
-    } else if ($view == "upcoming") {
+    } else if ($view == "upcoming" || $view == "upcoming_mini") {
         $upcoming = new \core_calendar\external\calendar_upcoming_exporter($calendar, $related);
         $data = $upcoming->export($renderer);
-        $template = 'core_calendar/calendar_upcoming';
+
+        if ($view == "upcoming") {
+            $template = 'core_calendar/calendar_upcoming';
+        } else if ($view == "upcoming_mini") {
+            $template = 'core_calendar/upcoming_mini';
+        }
     }
 
     return [$data, $template];
@@ -3286,11 +3239,16 @@ function calendar_output_fragment_event_form($args) {
             true,
             $data
         );
-        if ($courseid != SITEID) {
+
+        // Let's check first which event types user can add.
+        calendar_get_allowed_types($allowed, $courseid);
+
+        // If the user is on course context and is allowed to add course events set the event type default to course.
+        if ($courseid != SITEID && !empty($allowed->courses)) {
             $data['eventtype'] = 'course';
             $data['courseid'] = $courseid;
             $data['groupcourseid'] = $courseid;
-        } else if (!empty($categoryid)) {
+        } else if (!empty($categoryid) && !empty($allowed->category)) {
             $data['eventtype'] = 'category';
             $data['categoryid'] = $categoryid;
         }
@@ -3408,7 +3366,7 @@ function calendar_get_filter_types() {
 
     return array_map(function($type) {
         return [
-            'type' => $type,
+            'eventtype' => $type,
             'name' => get_string("eventtype{$type}", "calendar"),
         ];
     }, $types);

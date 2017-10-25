@@ -843,7 +843,7 @@ class navigation_node implements renderable {
  * @copyright 2010 Sam Hemelryk
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class navigation_node_collection implements IteratorAggregate {
+class navigation_node_collection implements IteratorAggregate, Countable {
     /**
      * A multidimensional array to where the first key is the type and the second
      * key is the nodes key.
@@ -2452,8 +2452,8 @@ class global_navigation extends navigation_node {
 
                     $reporttab = $usercoursenode->add(get_string('activityreports'));
 
-                    $reports = get_plugin_list_with_function('report', 'extend_navigation_user', 'lib.php');
-                    foreach ($reports as $reportfunction) {
+                    $reportfunctions = get_plugin_list_with_function('report', 'extend_navigation_user', 'lib.php');
+                    foreach ($reportfunctions as $reportfunction) {
                         $reportfunction($reporttab, $user, $usercourse);
                     }
 
@@ -4381,7 +4381,8 @@ class settings_navigation extends navigation_node {
         // Publish course on a hub
         if ($adminoptions->publish) {
             $url = new moodle_url('/course/publish/index.php', array('id'=>$course->id));
-            $coursenode->add(get_string('publish'), $url, self::TYPE_SETTING, null, 'publish', new pix_icon('i/publish', ''));
+            $coursenode->add(get_string('publish', 'core_hub'), $url, self::TYPE_SETTING, null, 'publish',
+                new pix_icon('i/publish', ''));
         }
 
         // Reset this course

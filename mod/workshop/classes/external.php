@@ -1280,6 +1280,10 @@ class mod_workshop_external extends external_api {
             }
         }
 
+        // Get dimensions info.
+        $grader = $workshop->grading_strategy_instance();
+        $result['dimensionsinfo'] = $grader->get_dimensions_info();
+
         return $result;
     }
 
@@ -1317,6 +1321,17 @@ class mod_workshop_external extends external_api {
                             'value' => new external_value(PARAM_RAW, 'Current field value.')
                         )
                     ), 'The current field values.'
+                ),
+                'dimensionsinfo' => new external_multiple_structure(
+                    new external_single_structure(
+                        array(
+                            'id' => new external_value(PARAM_INT, 'Dimension id.'),
+                            'min' => new external_value(PARAM_FLOAT, 'Minimum grade for the dimension.'),
+                            'max' => new external_value(PARAM_FLOAT, 'Maximum grade for the dimension.'),
+                            'weight' => new external_value(PARAM_TEXT, 'The weight of the dimension.'),
+                            'scale' => new external_value(PARAM_TEXT, 'Scale items (if used).', VALUE_OPTIONAL),
+                        )
+                    ), 'The dimensions general information.'
                 ),
                 'warnings' => new external_warnings()
             )
@@ -2058,6 +2073,11 @@ class mod_workshop_external extends external_api {
         $feedbackform = $workshop->get_feedbackauthor_form(null, $submission, $options);
 
         $errors = $feedbackform->validation((array) $data, array());
+        // Extra checks for the new grade (if set).
+        if (is_numeric($data->gradeover) && $data->gradeover > $workshop->grade) {
+            $errors['gradeover'] = 'The new grade cannot be higher than the maximum grade for submission.';
+        }
+
         // We can get several errors, return them in warnings.
         if (!empty($errors)) {
             $status = false;

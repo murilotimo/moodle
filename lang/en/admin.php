@@ -142,7 +142,7 @@ $string['configallowblockstodock'] = 'If enabled and supported by the selected t
 $string['configallowcategorythemes'] = 'If you enable this, then themes can be set at the category level. This will affect all child categories and courses unless they have specifically set their own theme. WARNING: Enabling category themes may affect performance.';
 $string['configallowcoursethemes'] = 'If you enable this, then courses will be allowed to set their own themes.  Course themes override all other theme choices (site, user, or session themes)';
 $string['configallowedemaildomains'] = 'List email domains that are allowed to be disclosed in the "From" section of outgoing email. The default of "Empty" will use the No-reply address for all outgoing email. The use of wildcards is allowed e.g. *.example.com will allow emails sent from any subdomain of example.com, but not example.com itself. This will require separate entry.';
-$string['configallowemailaddresses'] = 'If you want to restrict all new email addresses to particular domains, then list them here separated by spaces.  All other domains will be rejected.  To allow subdomains add the domain with a preceding \'.\'. eg <strong>ourcollege.edu.au .gov.au</strong>';
+$string['configallowemailaddresses'] = 'To restrict new email addresses to particular domains, list them here separated by spaces. All other domains will be rejected. To allow subdomains, add the domain with a preceding \'.\'. To allow a root domain together with its subdomains, add the domain twice - once with a preceding \'.\' and once without e.g. .ourcollege.edu.au ourcollege.edu.au.';
 $string['configallowguestmymoodle'] = 'If enabled guests can access Dashboard, otherwise guests are redirected to the site front page.';
 $string['configallowobjectembed'] = 'As a default security measure, normal users are not allowed to embed multimedia (like Flash) within texts using explicit EMBED and OBJECT tags in their HTML (although it can still be done safely using the mediaplugins filter).  If you wish to allow these tags then enable this option.';
 $string['configallowoverride'] = 'You can allow people with the roles on the left side to override some of the column roles';
@@ -750,6 +750,7 @@ $string['mnetrestore_extusers_admin'] = '<strong>Note:</strong> This backup file
 $string['mnetrestore_extusers_mismatch'] = '<strong>Note:</strong> This backup file apparently originates from a different Moodle installation and contains remote Moodle Network user accounts that may fail to restore. This operation is unsupported. If you are certain that it was created on this Moodle installation, or you can ensure that all the needed Moodle Network Hosts are configured, you may want to still try the restore.';
 $string['mnetrestore_extusers_noadmin'] = '<strong>Note:</strong> This backup file seems to come from a different Moodle installation and contains remote Moodle Network user accounts. You are not allowed to execute this type of restore. Contact the administrator of the site or, alternatively, restore this course without any user information (modules, files...)';
 $string['mnetrestore_extusers_switchuserauth'] = 'Remote Moodle Network user {$a->username} (coming from {$a->mnethosturl}) switched to local {$a->auth} authenticated user.';
+$string['mobilenotconfiguredwarning'] = 'Moodle Mobile is not enabled.';
 $string['modchooserdefault'] = 'Activity chooser default';
 $string['modeditdefaults'] = 'Default values for activity settings';
 $string['modsettings'] = 'Manage activities';
@@ -843,6 +844,7 @@ $string['pgclusterdescription'] = 'PostgreSQL version/cluster parameter for comm
 $string['phpfloatproblem'] = 'Detected unexpected problem in handling of PHP float numbers - {$a}';
 $string['pleaserefreshregistration'] = 'Your site is registered. Registration last updated {$a}.<br />The \'Site registration\' scheduled task keeps your registration up to date. You can also manually update your registration at any time.';
 $string['pleaserefreshregistrationunknown'] = 'Your site has been registered but the registration date is unknown. Please update your registration using the \'Update registration\' button or ensure that the \'Site registration\' scheduled task is enabled so your registration is automatically updated.';
+$string['pleaserefreshregistrationnewdata'] = 'Registration information has been changed. Please confirm it using the \'Update registration\' button.';
 $string['plugin'] = 'Plugin';
 $string['plugins'] = 'Plugins';
 $string['pluginscheck'] = 'Plugin dependencies check';
@@ -938,6 +940,15 @@ $string['quizattemptsupgradedmessage'] = 'In Moodle 2.1 there was a major upgrad
 $string['recaptchaprivatekey'] = 'ReCAPTCHA secret key';
 $string['recaptchapublickey'] = 'ReCAPTCHA site key';
 $string['register'] = 'Register your site';
+$string['registermoodlenet'] = 'We\'d love to stay in touch for important things for your Moodle site!
+
+By registering,
+
+* You are contributing to our collective knowledge about the users of Moodle which helps us improve Moodle and all our community services
+* You’ll be one of the first to find out about important notifications such as security alerts and new Moodle releases.
+* You can access and activate mobile push notifications from your Moodle site through our free [Moodle Mobile app](https://download.moodle.org/mobile/)
+* Optionally, your site can be included as a proud member and supporter of the Moodle community on the [list of registered sites](https://moodle.net/stats).
+';
 $string['registermoodleorg'] = 'When you register your site';
 $string['registermoodleorgli1'] = 'You are added to a low-volume mailing list for important notifications such as security alerts and new releases of Moodle.';
 $string['registermoodleorgli2'] = 'Statistics about your site will be added to the {$a} of the worldwide Moodle community.';

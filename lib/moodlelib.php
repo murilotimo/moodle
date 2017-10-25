@@ -2359,8 +2359,10 @@ function get_user_timezone($tz = 99) {
     $tz = 99;
 
     // Loop while $tz is, empty but not zero, or 99, and there is another timezone is the array.
-    while (((empty($tz) && !is_numeric($tz)) || $tz == 99) && $next = each($timezones)) {
-        $tz = $next['value'];
+    foreach ($timezones as $nextvalue) {
+        if ((empty($tz) && !is_numeric($tz)) || $tz == 99) {
+            $tz = $nextvalue;
+        }
     }
     return is_numeric($tz) ? (float) $tz : $tz;
 }
@@ -5579,7 +5581,7 @@ function get_mailer($action='get') {
             // Use SMTP directly.
             $mailer->isSMTP();
             if (!empty($CFG->debugsmtp)) {
-                $mailer->SMTPDebug = true;
+                $mailer->SMTPDebug = 3;
             }
             // Specify main and backup servers.
             $mailer->Host          = $CFG->smtphosts;
@@ -6285,6 +6287,7 @@ function send_password_change_info($user) {
     $data = new stdClass();
     $data->firstname = $user->firstname;
     $data->lastname  = $user->lastname;
+    $data->username  = $user->username;
     $data->sitename  = format_string($site->fullname);
     $data->admin     = generate_email_signoff();
 
