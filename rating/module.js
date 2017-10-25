@@ -6,7 +6,8 @@ M.core_rating = {
     init: function(Y) {
         this.Y = Y;
         Y.delegate('change', this.submit_rating, Y.config.doc.body, 'select.postratingmenu', this);
-        Y.delegate('click', this.submit_rating, Y.config.doc.body, '.btnratinginput', this);
+        //Y.delegate('click', this.submit_rating, Y.config.doc.body, '.btnratinginput', this);
+        Y.delegate('focus', this.submit_rating, Y.config.doc.body, '.btnratinginput', this);
 
         // Hide the submit buttons
         this.Y.all('input.postratingmenusubmit').setStyle('display', 'none');
@@ -14,23 +15,21 @@ M.core_rating = {
 
     submit_rating: function(e, selectnode) {
         var theinputs = e.target.ancestor('form').all('.ratinginput');
-        console.log(theinputs);
         var thedata = [];
 
         var inputssize = theinputs.size();
         for (var i = 0; i < inputssize; i++) {
             if (theinputs.item(i).get("name") != "returnurl") { // Dont include return url for ajax requests.
-                thedata[theinputs.item(i).get("name")] = theinputs.item(i).get("value");
-                console.log(theinputs.item(i).get("name"));
-                console.log(theinputs.item(i).get("value"));
+                if (theinputs.item(i).get("type") == "radio"){
+                    console.log(theinputs.item(i).get("checked"));
+                    if (theinputs.item(i).get("checked") == true) {
+                        thedata[theinputs.item(i).get("name")] = theinputs.item(i).get("value");
+                    }
+                } else {
+                    thedata[theinputs.item(i).get("name")] = theinputs.item(i).get("value");
+                }
             }
         }
-
-        // ESTAMOS PROCURANDO O PARAMETRO RATING, QUE É A NOTA A SER ENVIADA PELO BOTÃO
-        console.log("theinputs");
-        console.log(theinputs);
-        console.log('thedata');
-        console.log(thedata);
 
         var scope = this;
         var cfg = {

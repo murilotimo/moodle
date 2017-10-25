@@ -8468,7 +8468,12 @@ function make_grades_menu($gradingtype) {
     $grades = array();
     if ($gradingtype < 0) {
         if ($scale = $DB->get_record('scale', array('id'=> (-$gradingtype)))) {
-            return make_menu_from_list($scale->scale);
+        	$scalearray = make_menu_from_list($scale->scale);
+        	$scaleoptions = [];
+        	foreach ($scalearray as $optionid => $scaleoption) {
+        		$scaleoptions[$optionid] = strstr($scaleoption, '| ') ? str_replace( "|", "" ,strstr($scaleoption, '| '))  : $scaleoption;
+        	}
+            return $scaleoptions ;
         }
     } else if ($gradingtype > 0) {
         for ($i=$gradingtype; $i>=0; $i--) {
