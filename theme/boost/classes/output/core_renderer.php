@@ -373,6 +373,16 @@ class core_renderer extends \core_renderer {
      * @return string
      */
     public function body_css_classes(array $additionalclasses = array()) {
+        global $USER;
+        $context = $this->page->context;
+        $userid = $USER->id;
+        $roles = get_users_roles( $context , [$userid] , 0);
+        if ($roles) {
+            $roles = array_shift($roles);
+            foreach ($roles as $roleid => $value) {
+               $additionalclasses[] = 'role-'. $value->shortname;
+            };
+        };
         return $this->page->bodyclasses . ' ' . implode(' ', $additionalclasses);
     }
 
