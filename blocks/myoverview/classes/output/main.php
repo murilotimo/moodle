@@ -61,7 +61,7 @@ class main implements renderable, templatable {
      * @return stdClass
      */
     public function export_for_template(renderer_base $output) {
-        global $CFG, $USER;
+        global $CFG, $USER, $DB;
 
         if (empty($CFG->navsortmycoursessort)) {
             $sort = 'visible DESC, sortorder ASC';
@@ -69,7 +69,22 @@ class main implements renderable, templatable {
             $sort = 'visible DESC, '.$CFG->navsortmycoursessort.' ASC';
         }
 
-        $courses = enrol_get_my_courses('*', $sort);
+        //$result = $DB->get_records_sql('SELECT * FROM {table} WHERE foo = ?', array('bar'));
+
+        $resultscourseids = $DB->get_records_sql_menu("SELECT id
+            FROM {course}
+                where category in (
+                    Select id
+                        from {course_categories} 
+                        where path ~* ?
+                )", [2]);
+
+        $courseids = array_keys($resultscourseids);
+        var_dump($courseids);
+        var_dump([2]);
+        //die();
+
+        $courses = enrol_get_my_courses('*', $sort, 0, $courseids);
         $coursesprogress = [];
 
         foreach ($courses as $course) {
