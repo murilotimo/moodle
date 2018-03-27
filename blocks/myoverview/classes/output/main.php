@@ -77,6 +77,38 @@ class main implements renderable, templatable {
         ( Select id from {course_categories} where path ~* ?)",
         [2]);
         $courseids = array_keys($resultscourseids);
+        //ids dos cursos que não sao "cursos", hahahahaha, :D
+        //oK, tem umas comunidades, umas pesquisas e umas páginas, que de fato não são cursos, não vão para o curriculo,
+        //dai vamos mostrar isso em uma aba separada :D
+
+        $resultsnotcourses_ids = $DB->get_records_sql_menu("SELECT id FROM {course} where category in 
+        ( Select id from {course_categories} where path !~* ?)",
+        [2]);
+        $notcoursesid = array_keys($resultsnotcourses_ids);
+        $notcourses = enrol_get_my_courses('*', $sort, 0, $notcoursesid);
+        $coursesprogress = [];
+
+        foreach ($notcourses as $course) {
+
+            $completion = new \completion_info($course);
+
+            // First, let's make sure completion is enabled.
+            if (!$completion->is_enabled()) {
+                continue;
+            }
+
+            $percentage = progress::get_course_progress_percentage($course);
+            if (!is_null($percentage)) {
+                $percentage = floor($percentage);
+            }
+
+            $coursesprogress[$course->id]['completed'] = $completion->is_course_complete($USER->id);
+            $coursesprogress[$course->id]['progress'] = $percentage;
+        }
+
+        $notcoursesview = new courses_view($notcourses, $coursesprogress);
+
+        //tem mudanca nessa função com os ids dos que são "Cursos"
         $courses = enrol_get_my_courses('*', $sort, 0, $courseids);
         //a partir daqui fica tudo igual :D
         $coursesprogress = [];
@@ -115,6 +147,7 @@ class main implements renderable, templatable {
         return [
             'midnight' => usergetmidnight(time()),
             'coursesview' => $coursesview->export_for_template($output),
+            'moreview' => $notcoursesview->export_for_template($output),
             'urls' => [
                 'nocourses' => $nocoursesurl,
                 'noevents' => $noeventsurl
