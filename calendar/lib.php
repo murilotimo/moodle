@@ -794,9 +794,6 @@ class calendar_event {
                     \coursecat::get($properties->categoryid, MUST_EXIST, true);
                     // Course context.
                     $this->editorcontext = $this->properties->context;
-                    // We have a course and are within the course context so we had
-                    // better use the courses max bytes value.
-                    $this->editoroptions['maxbytes'] = $course->maxbytes;
                 } else {
                     // If we get here we have a custom event type as used by some
                     // modules. In this case the event will have been added by
@@ -1121,7 +1118,7 @@ class calendar_information {
      * course will be used.
      *
      * @param   stdClass    $course The current course being viewed.
-     * @param   int[]       $courses The list of all courses currently accessible.
+     * @param   stdClass[]  $courses The list of all courses currently accessible.
      * @param   stdClass    $category The current category to show.
      */
     public function set_sources(stdClass $course, array $courses, stdClass $category = null) {
@@ -1160,17 +1157,9 @@ class calendar_information {
 
             // Build the category list.
             // This includes the current category.
-            $this->categories = [$category->id];
-
-            // All of its descendants.
-            foreach (\coursecat::get_all() as $cat) {
-                if (array_search($category->id, $cat->get_parents()) !== false) {
-                    $this->categories[] = $cat->id;
-                }
-            }
-
-            // And all of its parents.
-            $this->categories = array_merge($this->categories, $category->get_parents());
+            $this->categories = $category->get_parents();
+            $this->categories[] = $category->id;
+            $this->categories = array_merge($this->categories, $category->get_all_children_ids());
         } else if (SITEID === $this->courseid) {
             // The site was requested.
             // Fetch all categories where this user has any enrolment, and all categories that this user can manage.
@@ -1180,26 +1169,25 @@ class calendar_information {
                 return $course->category;
             }, $courses));
 
-            $categories = [];
-            foreach (\coursecat::get_all() as $category) {
-                if (has_capability('moodle/category:manage', $category->get_context(), $USER, false)) {
-                    // If a user can manage a category, then they can see all child categories. as well as all parent categories.
-                    $categories[] = $category->id;
-                    foreach (\coursecat::get_all() as $cat) {
-                        if (array_search($category->id, $cat->get_parents()) !== false) {
-                            $categories[] = $cat->id;
+            $calcatcache = cache::make('core', 'calendar_categories');
+            $this->categories = $calcatcache->get('site');
+            if ($this->categories === false) {
+                // Use the category id as the key in the following array. That way we do not have to remove duplicates.
+                $categories = [];
+                foreach (\coursecat::get_all() as $category) {
+                    if (isset($coursecategories[$category->id]) ||
+                            has_capability('moodle/category:manage', $category->get_context(), $USER, false)) {
+                        // If the user has access to a course in this category or can manage the category,
+                        // then they can see all parent categories too.
+                        $categories[$category->id] = true;
+                        foreach ($category->get_parents() as $catid) {
+                            $categories[$catid] = true;
                         }
                     }
-                    $categories = array_merge($categories, $category->get_parents());
-                } else if (isset($coursecategories[$category->id])) {
-                    // The user has access to a course in this category.
-                    // Fetch all of the parents too.
-                    $categories = array_merge($categories, [$category->id], $category->get_parents());
-                    $categories[] = $category->id;
                 }
+                $this->categories = array_keys($categories);
+                $calcatcache->set('site', $this->categories);
             }
-
-            $this->categories = array_unique($categories);
         }
     }
 
@@ -1803,6 +1791,13 @@ function calendar_time_representation($time) {
     $timeformat = get_user_preferences('calendar_timeformat');
     if (empty($timeformat)) {
         $timeformat = get_config(null, 'calendar_site_timeformat');
+    }
+
+    // Allow language customization of selected time format.
+    if ($timeformat === CALENDAR_TF_12) {
+        $timeformat = get_string('strftimetime12', 'langconfig');
+    } else if ($timeformat === CALENDAR_TF_24) {
+        $timeformat = get_string('strftimetime24', 'langconfig');
     }
 
     return userdate($time, empty($timeformat) ? $langtimeformat : $timeformat);
