@@ -69,22 +69,16 @@ class main implements renderable, templatable {
             $sort = 'visible DESC, '.$CFG->navsortmycoursessort.' ASC';
         }
 
-        //$result = $DB->get_records_sql('SELECT * FROM {table} WHERE foo = ?', array('bar'));
-
-        $resultscourseids = $DB->get_records_sql_menu("SELECT id
-            FROM {course}
-                where category in (
-                    Select id
-                        from {course_categories} 
-                        where path ~* ?
-                )", [2]);
-
+        //bem, o tempo é curto e é madrugada, por isso estou fazendo ajustes rápidos no código para cumprir o prazo.
+        //a ideia aqui é utilizar o que já esta pronto do moodle e dar aquela guaribada
+        //para apresentar para o usuário somente cursos em que ele está incrito a ideia é:
+        //primeiro pegar os ids de todos os cursos e passar para a funçõa que já era utilizada pela comunidade que possui filtro pelo id do curso
+        $resultscourseids = $DB->get_records_sql_menu("SELECT id FROM {course} where category in 
+        ( Select id from {course_categories} where path ~* ?)",
+        [2]);
         $courseids = array_keys($resultscourseids);
-        var_dump($courseids);
-        var_dump([2]);
-        //die();
-
         $courses = enrol_get_my_courses('*', $sort, 0, $courseids);
+        //a partir daqui fica tudo igual :D
         $coursesprogress = [];
 
         foreach ($courses as $course) {
