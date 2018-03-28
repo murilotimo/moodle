@@ -26,24 +26,17 @@
     {{#hascourses}}
     <div class="text-xs-center text-center">
         <div class="btn-group m-y-2" role="group" data-toggle="btns">
-            <a class="btn btn-default active" href="#more_myoverview_courses_view_in_progress" data-toggle="tab">
+            <a class="btn btn-default active" href="#myoverview_more_courses_view_in_progress" data-toggle="tab">
                 {{#str}} inprogress, block_myoverview {{/str}}
+            </a>
+            <a class="btn btn-default" href="#myoverview_more_courses_view_future" data-toggle="tab">
+                {{#str}} future, block_myoverview {{/str}}
+            </a>
+            <a class="btn btn-default" href="#myoverview_more_courses_view_past" data-toggle="tab">
+                {{#str}} past, block_myoverview {{/str}}
             </a>
         </div>
     </div>
-    {{!
-    A retirada dos demais processos, 'tempos' de cursos(futuro e passado aqui), ao mesmo tempo que é bizzarro, é interessante...
-    não faz sentido apresentar um curso sendo ele comunidade, pesquisa ou qualquer outra coisa, se retiramos eles... ele já foi resolvido... :D
-    além disso esses botões estão quebrando as páginas...(esse é o principal motivo, e não da tempo de investigar agora.)
-    vamoss ver se funciona? E só por uma questão de estetica manteremos o em progresso :D (se tirar ele o espaçamento fica estranho :/)
-    uma cagada, bem, atualmete acho, mas pra quem fica estão aí minhas sinceras desculpas, e tomara que você não entenda minha decisão e fique tão puto
-    quanto eu fico agora :D
-    E pra garantir, o primeiro quem achar esse comentário, ganha R$ 400,00 reais, que foi o cachê do show de sábado 20180324.
-    e em acordo infinito(qualquer pessoa que achar depois), ganha a primeira conta do bar.(a primeira vez que a gente se encontrar eu pago a conta.
-    só escolhe um restaurante bom!!! ok?)
-    *só não vale pra quem eu mostrar :P
-    murilotimo@gmail.com
-    }}
     <div class="tab-content">
         <div class="tab-pane active fade in" id="more_myoverview_courses_view_in_progress">
             {{#inprogress}}
@@ -116,7 +109,7 @@
 </div>
 {{#js}}
 require(['jquery', 'core/custom_interaction_events'], function($, customEvents) {
-    var root = $('#courses-view-{{uniqid}}');
+    var root = $('#more-courses-view-{{uniqid}}');
     customEvents.define(root, [customEvents.events.activate]);
     root.on(customEvents.events.activate, '[data-toggle="btns"] > .btn', function() {
         root.find('.btn.active').removeClass('active');
